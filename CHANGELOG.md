@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-04-17
+
+### Changed
+
+- Internal refactoring of `service.ts`: merged duplicate `applyEntry`/`applyExit` into a single `applyLifecycle` helper; consolidated `dispatching`/`flushing` flags into a single `busy` flag. No behavior change.
+- Internal refactoring of `machine.ts`: extracted config validation loop into a named `validateConfig` function; removed redundant explicit type parameters on `normalizeTransitions` calls. No behavior change.
+
+### Added
+
+- Interactive examples site published at [toshtag.github.io/fsmxjs](https://toshtag.github.io/fsmxjs/) — five live demos covering toggle, form wizard, queue mode, serialization, and async search
+
 ## [async-1.0.0] - 2026-04-17
 
 Initial release of `@fsmxjs/async` — async task helpers for fsmxjs services.
