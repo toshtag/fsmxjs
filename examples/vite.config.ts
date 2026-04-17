@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import path from 'path';
 
 export default defineConfig({
+  base: process.env.GITHUB_ACTIONS ? '/fsmxjs/' : '/',
   resolve: {
     alias: {
       fsmxjs: path.resolve(__dirname, '../src/index.ts'),
