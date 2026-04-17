@@ -85,12 +85,14 @@ describe('createService', () => {
             entry: () => {
               throw new Error('entry failed');
             },
+            on: { PING: {} },
           },
         },
       });
       const service = createService(machine);
       expect(() => service.start()).toThrow('entry failed');
-      expect(() => service.send({ type: 'X' as never })).toThrow();
+      // status rolled back — send must throw (not running)
+      expect(() => service.send({ type: 'PING' })).toThrow();
     });
   });
 
@@ -215,15 +217,18 @@ describe('createService', () => {
             exit: () => {
               throw new Error('exit failed');
             },
-            on: { GO: { target: 'done' } },
+            on: {
+              // internal transition — no target, so machine.transition
+              // does not run exit actions
+              PING: { actions: () => ({}) },
+            },
           },
-          done: {},
         },
       });
       const service = createService(machine).start();
       expect(() => service.stop()).toThrow('exit failed');
-      // status rolled back to running — send should work
-      expect(() => service.send({ type: 'GO' })).not.toThrow();
+      // status rolled back to running — internal send must not throw
+      expect(() => service.send({ type: 'PING' })).not.toThrow();
     });
   });
 
@@ -277,9 +282,13 @@ describe('createService', () => {
           },
         },
       });
-      const service = createService(machine).start();
+      const service = createService(machine);
       const listener = vi.fn();
+      // Register before start so initial notification sets prev = NaN
       service.select((s) => s.context.val, listener);
+      service.start();
+      listener.mockClear();
+      // PING keeps val as NaN — Object.is(NaN, NaN) is true, must not fire
       service.send({ type: 'PING' });
       expect(listener).not.toHaveBeenCalled();
     });
