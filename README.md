@@ -332,11 +332,84 @@ function useMachine<C, E extends { type: string }, V extends string>(
 
 ---
 
-## Roadmap
+## Async helpers — `@fsmxjs/async`
 
-| Version | Status | Notes |
+For async workflows, install the companion package:
+
+```sh
+npm install @fsmxjs/async
+# or
+pnpm add @fsmxjs/async
+```
+
+### `createTaskManager(service)`
+
+Manages keyed async tasks. Starting a new task with the same key aborts the previous one.
+
+```ts
+import { createTaskManager } from '@fsmxjs/async';
+
+const manager = createTaskManager(service);
+
+// Start a task. A new call with the same key aborts the running one.
+await manager.run('fetch', async ({ signal, snapshot, send }) => {
+  const data = await fetch('/api/data', { signal }).then((r) => r.json());
+  if (!signal.aborted) {
+    send({ type: 'LOADED', data });
+  }
+});
+
+// Abort all running tasks (call before service.stop())
+manager.abortAll();
+service.stop();
+```
+
+| Argument | Type | Description |
 |---|---|---|
-| v2.0 | Planned | Optional async action helpers (separate entrypoint) |
+| `key` | `string` | Task slot identifier |
+| `task` | `TaskFn` | Async function receiving `{ signal, snapshot, send }` |
+
+**`TaskFn` arguments:**
+
+| Field | Description |
+|---|---|
+| `signal` | `AbortSignal` — fires when a newer task with the same key is started |
+| `snapshot` | Snapshot captured at the time `run()` was called |
+| `send` | Wraps `service.send()` — no-op if `signal.aborted` |
+
+**Error semantics:**
+
+| Case | Result |
+|---|---|
+| Task completes normally | `run()` resolves |
+| Task throws (not aborted) | `run()` rejects with the error |
+| Task throws after abort | `run()` resolves (stale error swallowed) |
+
+> **Note:** `abortAll()` sends an abort signal to all running tasks. It does not forcibly stop in-flight Promises — tasks must check `signal.aborted` or pass `signal` to `fetch`/other APIs to respond to cancellation.
+
+> **Service stop:** `@fsmxjs/async` does not auto-detect service lifecycle stop. Call `manager.abortAll()` before `service.stop()` to cancel running tasks.
+
+---
+
+### `takeLatest(service, key)`
+
+Convenience wrapper over `createTaskManager`. Each call supersedes the previous task for that key.
+
+```ts
+import { takeLatest } from '@fsmxjs/async';
+
+const runSearch = takeLatest(service, 'search');
+
+// Only the last call is active — earlier calls are aborted automatically.
+inputEl.addEventListener('input', () => {
+  runSearch(async ({ signal, send }) => {
+    const results = await search(inputEl.value, { signal });
+    if (!signal.aborted) send({ type: 'RESULTS', results });
+  });
+});
+```
+
+---
 
 ## License
 
