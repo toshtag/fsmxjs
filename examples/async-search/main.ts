@@ -2,10 +2,10 @@ import { createMachine, createService } from 'fsmxjs';
 import { takeLatest } from '@fsmxjs/async';
 
 const FRUITS = [
-  'apple', 'apricot', 'avocado', 'banana', 'blueberry', 'cherry', 'coconut',
-  'date', 'fig', 'grape', 'guava', 'kiwi', 'lemon', 'lime', 'mango',
-  'melon', 'orange', 'papaya', 'peach', 'pear', 'pineapple', 'plum',
-  'pomegranate', 'raspberry', 'strawberry', 'watermelon',
+  'apple','apricot','avocado','banana','blueberry','cherry','coconut',
+  'date','fig','grape','guava','kiwi','lemon','lime','mango',
+  'melon','orange','papaya','peach','pear','pineapple','plum',
+  'pomegranate','raspberry','strawberry','watermelon',
 ];
 
 function fakeSearch(query: string, signal: AbortSignal): Promise<string[]> {
@@ -25,24 +25,26 @@ type Event =
   | { type: 'ERROR' };
 type State = 'idle' | 'loading' | 'ready';
 
+const searchAction = [(ctx: Context, e: Event) =>
+  e.type === 'SEARCH' ? { query: e.query, results: [] } : {}
+];
+
 const machine = createMachine<Context, Event, State>({
   initial: 'idle',
   context: { results: [], query: '' },
   states: {
     idle: {
-      on: { SEARCH: { target: 'loading', actions: [(ctx, e) => e.type === 'SEARCH' ? { query: e.query, results: [] } : {}] } },
+      on: { SEARCH: { target: 'loading', actions: searchAction } },
     },
     loading: {
       on: {
-        SEARCH: { target: 'loading', actions: [(ctx, e) => e.type === 'SEARCH' ? { query: e.query, results: [] } : {}] },
+        SEARCH:  { target: 'loading', actions: searchAction },
         RESULTS: { target: 'ready', actions: [(_ctx, e) => e.type === 'RESULTS' ? { results: e.results } : {}] },
-        ERROR: { target: 'idle' },
+        ERROR:   { target: 'idle' },
       },
     },
     ready: {
-      on: {
-        SEARCH: { target: 'loading', actions: [(ctx, e) => e.type === 'SEARCH' ? { query: e.query, results: [] } : {}] },
-      },
+      on: { SEARCH: { target: 'loading', actions: searchAction } },
     },
   },
 });
@@ -51,15 +53,17 @@ const service = createService(machine);
 service.start();
 
 const search = takeLatest(service, 'search');
-
-const statusEl = document.getElementById('status')!;
+const statusEl  = document.getElementById('status')!;
 const resultsEl = document.getElementById('results')!;
 
 service.subscribe((snap) => {
   statusEl.textContent = snap.value === 'loading' ? 'Searching…' : '';
+  statusEl.className = 'search-status' + (snap.value === 'loading' ? ' loading' : '');
+
   while (resultsEl.firstChild) resultsEl.removeChild(resultsEl.firstChild);
   snap.context.results.forEach((r) => {
     const li = document.createElement('li');
+    li.className = 'result-item';
     li.textContent = r;
     resultsEl.appendChild(li);
   });

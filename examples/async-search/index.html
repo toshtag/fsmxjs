@@ -3,28 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Async search — fsmxjs examples</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 3rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.25rem; }
-    p { color: #555; font-size: 0.9rem; }
-    input { width: 100%; box-sizing: border-box; padding: 0.5rem; font-size: 1rem; }
-    .status { margin-top: 0.5rem; font-size: 0.875rem; color: #888; min-height: 1.2em; }
-    ul { padding-left: 1.25rem; margin-top: 0.75rem; }
-    li { margin: 0.25rem 0; }
-    a { font-size: 0.875rem; color: #0969da; }
-  </style>
+  <title>Async Search — fsmxjs</title>
+  <link rel="stylesheet" href="../style.css" />
 </head>
 <body>
-  <a href="../">← back</a>
-  <h1>Async search</h1>
-  <p>
-    Each keystroke triggers an async search. <code>takeLatest</code> automatically cancels the previous
-    in-flight request so stale results never appear.
-  </p>
-  <input id="query" type="text" placeholder="Type to search fruits…" />
-  <div class="status" id="status"></div>
-  <ul id="results"></ul>
+  <div class="page">
+    <nav class="nav">
+      <a href="../" class="back-link">← examples</a>
+    </nav>
+
+    <header class="header">
+      <div class="concept-pill">@fsmxjs/async · takeLatest</div>
+      <h1>Async Search</h1>
+      <p class="desc">
+        <code>takeLatest</code> ensures only the most recent task for a key runs.
+        Each new call aborts the previous one via <code>AbortSignal</code> —
+        so no matter how fast you type, only the result for the latest input arrives.
+        No debounce logic, no stale-result guards, no manual cancellation flags.
+      </p>
+    </header>
+
+    <div class="demo">
+      <div class="demo-bar">
+        <span class="demo-bar-label">interactive demo</span>
+        <div class="demo-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="demo-body">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input
+            class="search-input"
+            id="query"
+            type="text"
+            placeholder="Search fruits…"
+            autocomplete="off"
+          />
+        </div>
+        <div class="search-status" id="status"></div>
+        <ul class="results" id="results"></ul>
+      </div>
+    </div>
+
+    <div class="use-section">
+      <div class="section-label">Use this pattern for</div>
+      <div class="use-grid">
+        <div class="use-item"><span class="use-icon">🔍</span> Live search and autocomplete inputs</div>
+        <div class="use-item"><span class="use-icon">✅</span> Real-time validation against a remote API</div>
+        <div class="use-item"><span class="use-icon">👁</span> Live preview generation (markdown, code)</div>
+        <div class="use-item"><span class="use-icon">📊</span> Dashboard filters that fetch data on change</div>
+      </div>
+    </div>
+  </div>
   <script type="module" src="./main.ts"></script>
 </body>
 </html>

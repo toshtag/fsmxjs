@@ -20,14 +20,16 @@ const machine = createMachine<Context, Event, State>({
 const service = createService(machine);
 service.start();
 
-const stateEl = document.getElementById('state')!;
+const nodeOff = document.getElementById('nodeOff')!;
+const nodeOn  = document.getElementById('nodeOn')!;
 const countEl = document.getElementById('count')!;
-const btn = document.getElementById('btn')!;
+const btn     = document.getElementById('btn')!;
 
 function render() {
-  const snap = service.getSnapshot();
-  stateEl.textContent = snap.value;
-  countEl.textContent = `toggled ${snap.context.toggleCount} time(s)`;
+  const { value, context } = service.getSnapshot();
+  nodeOff.classList.toggle('active', value === 'off');
+  nodeOn.classList.toggle('active',  value === 'on');
+  countEl.textContent = `toggled ${context.toggleCount} time(s)`;
 }
 
 service.subscribe(render);

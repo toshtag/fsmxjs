@@ -8,29 +8,27 @@ const machine = createMachine<Context, Event, State>({
   initial: 'idle',
   context: {},
   states: {
-    idle: { on: { TRIGGER: { target: 'processing' } } },
-    processing: { on: { CHAINED: { target: 'chained' } } },
-    chained: { on: { DONE: { target: 'finished' } } },
-    finished: { on: { TRIGGER: { target: 'processing' } } },
+    idle:       { on: { TRIGGER:  { target: 'processing' } } },
+    processing: { on: { CHAINED:  { target: 'chained' } } },
+    chained:    { on: { DONE:     { target: 'finished' } } },
+    finished:   { on: { TRIGGER:  { target: 'processing' } } },
   },
 });
 
 const service = createService(machine, {
   queue: true,
   onTransition: ({ next }) => {
-    log(`→ state: ${next.value}  (event: ${next.event.type})`, 'transition');
+    appendLog(`→ state: ${next.value}   (event: ${next.event.type})`, 'is-state');
   },
 });
 
-// Subscriber sends a chained event from within a transition callback.
-// Without queue mode this would be silently dropped; with queue:true it is enqueued.
 service.subscribe((snap) => {
   if (snap.value === 'processing') {
-    log('  subscriber fires — sending CHAINED');
+    appendLog('  subscriber fires — enqueuing CHAINED');
     service.send({ type: 'CHAINED' });
   }
   if (snap.value === 'chained') {
-    log('  subscriber fires — sending DONE');
+    appendLog('  subscriber fires — enqueuing DONE');
     service.send({ type: 'DONE' });
   }
 });
@@ -39,15 +37,26 @@ service.start();
 
 const logEl = document.getElementById('log')!;
 
-function log(msg: string, cls = '') {
-  const div = document.createElement('div');
-  div.className = 'entry ' + cls;
-  div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-  logEl.prepend(div);
+function appendLog(msg: string, cls = '') {
+  const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+  const row = document.createElement('div');
+  row.className = 'log-row';
+
+  const t = document.createElement('span');
+  t.className = 'log-time';
+  t.textContent = time;
+
+  const m = document.createElement('span');
+  m.className = 'log-text ' + cls;
+  m.textContent = msg;
+
+  row.appendChild(t);
+  row.appendChild(m);
+  logEl.prepend(row);
 }
 
 document.getElementById('trigger')!.addEventListener('click', () => {
-  log('--- TRIGGER sent ---');
+  appendLog('--- TRIGGER sent ---', 'is-sep');
   service.send({ type: 'TRIGGER' });
 });
 
