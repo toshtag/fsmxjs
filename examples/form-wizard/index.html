@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Form wizard — fsmxjs examples</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 3rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    .step { display: none; }
+    .step.active { display: block; }
+    label { display: block; margin: 0.75rem 0 0.25rem; }
+    input { width: 100%; box-sizing: border-box; padding: 0.4rem 0.5rem; font-size: 1rem; }
+    .error { color: #c00; font-size: 0.875rem; min-height: 1.2em; }
+    button { margin-top: 1rem; padding: 0.5rem 1.25rem; font-size: 1rem; cursor: pointer; }
+    .review dt { font-weight: bold; margin-top: 0.5rem; }
+    .review dd { margin: 0; }
+    .submitted { font-size: 1.25rem; color: #2a7; font-weight: bold; }
+    a { font-size: 0.875rem; color: #0969da; }
+  </style>
+</head>
+<body>
+  <a href="../">← back</a>
+  <h1>Form wizard</h1>
+
+  <div id="step1" class="step">
+    <label>Name <input id="name" type="text" placeholder="Your name" /></label>
+    <div class="error" id="err1"></div>
+    <button id="next1">Next →</button>
+  </div>
+
+  <div id="step2" class="step">
+    <label>Email <input id="email" type="text" placeholder="you@example.com" /></label>
+    <div class="error" id="err2"></div>
+    <button id="back2">← Back</button>
+    <button id="next2">Review →</button>
+  </div>
+
+  <div id="review" class="step">
+    <dl class="review">
+      <dt>Name</dt><dd id="rName"></dd>
+      <dt>Email</dt><dd id="rEmail"></dd>
+    </dl>
+    <button id="back3">← Back</button>
+    <button id="submit">Submit</button>
+  </div>
+
+  <div id="submitted" class="step">
+    <p class="submitted">Submitted!</p>
+    <button id="reset">Start over</button>
+  </div>
+
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
