@@ -505,15 +505,32 @@ inputEl.addEventListener('input', () => {
 | v1.1 | Debug hooks (`onTransition`, `onError`), runtime config validation |
 | v1.2 | Queue mode, explicit stop-during-flush semantics |
 | v1.3 | Snapshot serialization (`serializeSnapshot`, `deserializeSnapshot`) |
-| v2.0 | `@fsmxjs/async` companion package; core remains async-free |
+| v2.0 milestone | `@fsmxjs/async` introduced; core remains async-free |
 
-### Future direction
+### v2.x — near-term maintenance track
 
-**v2.x** — Improve async usability without expanding core responsibilities. All improvements stay within companion packages. No changes to core runtime semantics.
+- Async usability improvements without expanding core responsibilities
+- Documentation refinement and example quality improvements
+- Internal refactoring for maintainability, developer efficiency, and targeted performance improvements
+  - file/module reorganization
+  - test structure cleanup
+  - build/test script simplification
+  - hot-path profiling and micro-optimizations only where justified
+- Public demo/examples site
+  - minimal interactive examples
+  - queue mode demo
+  - serialization / hydration demo
+  - async task manager demo
 
-**v3 (tentative)** — Re-evaluate repository structure if package count and maintenance cost justify it. Candidates: workspace/monorepo migration, `@fsmxjs/devtools`, `@fsmxjs/react`. No commitment yet.
+### v3 (tentative)
 
-See [Design Philosophy](#design-philosophy) for core design constraints.
+- Re-evaluate repository/package structure if package count and maintenance cost justify it
+- Candidates: workspace/monorepo migration, `@fsmxjs/devtools`, `@fsmxjs/react`
+- No commitment yet
+
+### Core constraints
+
+See [Design Philosophy](#design-philosophy).
 
 ---
 
