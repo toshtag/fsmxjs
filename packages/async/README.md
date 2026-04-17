@@ -16,14 +16,14 @@ Requires `fsmxjs >=1.3.0` as a peer dependency.
 
 ### `createTaskManager(service)`
 
-Manages keyed async tasks. Starting a new task with the same key automatically aborts the previous one.
+Manages keyed async tasks. Starting a new task with the same key automatically aborts the previous one. A new task starts immediately — it does not wait for the previous task to finish cleanup.
 
 ```ts
 import { createTaskManager } from '@fsmxjs/async';
 
 const manager = createTaskManager(service);
 
-manager.run('fetch', async ({ signal, send }) => {
+manager.run('fetch', async ({ signal, snapshot, send }) => {
   const data = await fetch('/api/data', { signal }).then((r) => r.json());
   send({ type: 'LOADED', data }); // no-op if task was superseded
 });
@@ -58,7 +58,17 @@ type TaskFn<TContext, TEvent, TStateValue> = (args: {
 }) => Promise<void>;
 ```
 
-`send` is a no-op once the abort signal fires, so stale results are safely discarded without explicit guards.
+- `signal` — fires when a newer task with the same key is started, or `abortAll()` is called
+- `snapshot` — captured at `run()` call time; does not update during task execution
+- `send` — forwards to `service.send()` while active; becomes a no-op once the task is aborted
+
+## Error semantics
+
+| Case | Result |
+|---|---|
+| Task completes normally | `run()` resolves |
+| Task throws (not aborted) | `run()` rejects with the error |
+| Task throws after abort | `run()` resolves (stale error swallowed) |
 
 ## Teardown
 

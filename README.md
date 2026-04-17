@@ -3,8 +3,26 @@
 Minimal, framework-agnostic finite state machine library for TypeScript.
 
 **[Live examples →](https://toshtag.github.io/fsmxjs/)**
+Toggle · Form wizard · Queue mode · Snapshot serialization · Async task manager
 
 Originally inspired by [@xstate/fsm](https://github.com/statelyai/xstate/tree/main/packages/xstate-fsm), but evolved into a distinct design: synchronous-only core, async handled entirely outside via companion packages, and explicit rejection of actor/invoke semantics.
+
+## Contents
+
+- [Features](#features)
+- [Design Philosophy](#design-philosophy)
+- [Installation](#installation)
+- [Package Architecture](#package-architecture)
+- [Quick Start](#quick-start)
+- [API Reference](#api-reference)
+  - [`createMachine`](#createmachineconfig)
+  - [`createService`](#createservicemachine-options)
+  - [`serializeSnapshot`](#serializesnapshotsnapshot)
+  - [`deserializeSnapshot`](#deserializesnapshotserialized)
+- [Framework Integration](#framework-integration)
+- [Async helpers — `@fsmxjs/async`](#async-helpers--fsmxjsasync)
+- [Roadmap](#roadmap)
+- [License](#license)
 
 ## Features
 
