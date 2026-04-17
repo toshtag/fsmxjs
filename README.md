@@ -22,6 +22,7 @@ Originally inspired by [@xstate/fsm](https://github.com/statelyai/xstate/tree/ma
 - [Framework Integration](#framework-integration)
 - [Async helpers — `@fsmxjs/async`](#async-helpers--fsmxjsasync)
 - [Roadmap](#roadmap)
+- [Community](#community)
 - [License](#license)
 
 ## Features
@@ -547,6 +548,24 @@ inputEl.addEventListener('input', () => {
 ### Core constraints
 
 See [Design Philosophy](#design-philosophy).
+
+---
+
+## Community
+
+| Channel | Use for |
+|---------|---------|
+| [Discussions](https://github.com/toshtag/fsmxjs/discussions) | Questions, ideas, show-and-tell, anything that isn't a confirmed bug |
+| [Issues](https://github.com/toshtag/fsmxjs/issues) | Confirmed bugs only |
+
+**Rule of thumb:** if you're not sure whether it's a bug, open a Discussion first.
+
+### Discussion categories
+
+- **Q&A** — usage questions, "is this the right approach?", unexpected behavior you aren't sure is a bug
+- **Ideas** — feature proposals (please read [CONTRIBUTING.md](CONTRIBUTING.md) before posting)
+- **Show and tell** — projects or demos built with fsmxjs
+- **General** — everything else
 
 ---
 
