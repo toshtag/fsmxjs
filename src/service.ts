@@ -34,8 +34,7 @@ export function createService<
 
   let snapshot: S = machine.initialState;
   let status: Status = 'idle';
-  let dispatching = false;
-  let flushing = false;
+  let busy = false;
   let queue: TEvent[] = [];
   const listeners = new Set<(s: S) => void>();
 
@@ -45,28 +44,13 @@ export function createService<
     }
   }
 
-  function applyEntry(snap: S): S {
+  function applyLifecycle(snap: S, hook: 'entry' | 'exit'): S {
     const stateNode = machine.config.states[snap.value];
-    if (!stateNode?.entry) return snap;
-    const entries = Array.isArray(stateNode.entry)
-      ? stateNode.entry
-      : [stateNode.entry];
+    const fns = stateNode?.[hook];
+    if (!fns) return snap;
+    const list = Array.isArray(fns) ? fns : [fns];
     let ctx = snap.context as TContext;
-    for (const fn of entries) {
-      const patch = fn(ctx, snap.event as TEvent);
-      if (patch !== undefined) ctx = Object.assign({}, ctx, patch);
-    }
-    return ctx === snap.context ? snap : { ...snap, context: ctx };
-  }
-
-  function applyExit(snap: S): S {
-    const stateNode = machine.config.states[snap.value];
-    if (!stateNode?.exit) return snap;
-    const exits = Array.isArray(stateNode.exit)
-      ? stateNode.exit
-      : [stateNode.exit];
-    let ctx = snap.context as TContext;
-    for (const fn of exits) {
+    for (const fn of list) {
       const patch = fn(ctx, snap.event as TEvent);
       if (patch !== undefined) ctx = Object.assign({}, ctx, patch);
     }
@@ -97,24 +81,24 @@ export function createService<
     if (next === prev) return;
     snapshot = next;
     fireOnTransition(prev, next, event);
-    dispatching = true;
+    busy = true;
     try {
       notify(snapshot);
     } finally {
-      dispatching = false;
+      busy = false;
     }
   }
 
   function flushQueue(): void {
-    if (flushing) return;
-    flushing = true;
+    if (busy) return;
+    busy = true;
     try {
       while (queue.length > 0 && status === 'running') {
         const event = queue.shift()!;
         processEvent(event);
       }
     } finally {
-      flushing = false;
+      busy = false;
       queue = [];
     }
   }
@@ -127,7 +111,7 @@ export function createService<
       const prev = snapshot;
       let next: S;
       try {
-        next = applyEntry(snapshot);
+        next = applyLifecycle(snapshot, 'entry');
       } catch (err) {
         status = prevStatus;
         fireOnError(err);
@@ -146,7 +130,7 @@ export function createService<
       const prev = snapshot;
       let next: S;
       try {
-        next = applyExit(snapshot);
+        next = applyLifecycle(snapshot, 'exit');
       } catch (err) {
         status = 'running';
         fireOnError(err);
@@ -169,7 +153,7 @@ export function createService<
         throw new Error(`Cannot send "${event.type}": service has been stopped`);
       }
       if (options?.queue) {
-        if (dispatching || flushing) {
+        if (busy) {
           queue.push(event);
           return snapshot;
         }
@@ -177,7 +161,7 @@ export function createService<
         flushQueue();
         return snapshot;
       }
-      if (dispatching || flushing) {
+      if (busy) {
         throw new Error(
           `Reentrant send detected: cannot send "${event.type}" from within a subscriber`,
         );
