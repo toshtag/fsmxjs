@@ -456,4 +456,71 @@ describe('createService', () => {
       expect(listener).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('ServiceOptions: onError', () => {
+    it('is called when entry throws and original error propagates', () => {
+      const machine = createMachine({
+        initial: 'idle',
+        context: {},
+        states: {
+          idle: {
+            entry: () => { throw new Error('entry error'); },
+            on: { PING: {} },
+          },
+        },
+      });
+      const onError = vi.fn();
+      const service = createService(machine, { onError } as AnyOptions);
+      expect(() => service.start()).toThrow('entry error');
+      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('is called when exit throws and original error propagates', () => {
+      const machine = createMachine({
+        initial: 'idle',
+        context: {},
+        states: {
+          idle: {
+            exit: () => { throw new Error('exit error'); },
+            on: { PING: {} },
+          },
+        },
+      });
+      const onError = vi.fn();
+      const service = createService(machine, { onError } as AnyOptions).start();
+      expect(() => service.stop()).toThrow('exit error');
+      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('is called when transition action throws and original error propagates', () => {
+      const machine = createMachine({
+        initial: 'idle',
+        context: {},
+        states: {
+          idle: {
+            on: {
+              BOOM: { actions: () => { throw new Error('action error'); } },
+            },
+          },
+        },
+      });
+      const onError = vi.fn();
+      const service = createService(machine, { onError } as AnyOptions).start();
+      expect(() => service.send({ type: 'BOOM' })).toThrow('action error');
+      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('is called when onTransition throws and FSM state is updated', () => {
+      const onError = vi.fn();
+      const service = createService(toggleMachine, {
+        onTransition: () => { throw new Error('hook error'); },
+        onError,
+      } as AnyOptions).start();
+      onError.mockClear();
+      const before = service.getSnapshot();
+      service.send({ type: 'TOGGLE' });
+      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+      expect(service.getSnapshot()).not.toBe(before);
+    });
+  });
 });
