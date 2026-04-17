@@ -35,6 +35,8 @@ export function createService<
   let snapshot: S = machine.initialState;
   let status: Status = 'idle';
   let dispatching = false;
+  let flushing = false;
+  let queue: TEvent[] = [];
   const listeners = new Set<(s: S) => void>();
 
   function notify(s: S): void {
@@ -83,6 +85,40 @@ export function createService<
     }
   }
 
+  function processEvent(event: TEvent): void {
+    const prev = snapshot;
+    let next: S;
+    try {
+      next = machine.transition(snapshot, event);
+    } catch (err) {
+      fireOnError(err);
+      throw err;
+    }
+    if (next === prev) return;
+    snapshot = next;
+    fireOnTransition(prev, next, event);
+    dispatching = true;
+    try {
+      notify(snapshot);
+    } finally {
+      dispatching = false;
+    }
+  }
+
+  function flushQueue(): void {
+    if (flushing) return;
+    flushing = true;
+    try {
+      while (queue.length > 0 && status === 'running') {
+        const event = queue.shift()!;
+        processEvent(event);
+      }
+    } finally {
+      flushing = false;
+      queue = [];
+    }
+  }
+
   const service: Service<TContext, TEvent, TStateValue> = {
     start() {
       if (status === 'running') return service;
@@ -106,6 +142,7 @@ export function createService<
     stop() {
       if (status !== 'running') return service;
       status = 'stopped';
+      queue = [];
       const prev = snapshot;
       let next: S;
       try {
@@ -131,28 +168,21 @@ export function createService<
       if (status === 'stopped') {
         throw new Error(`Cannot send "${event.type}": service has been stopped`);
       }
-      if (dispatching) {
+      if (options?.queue) {
+        if (dispatching || flushing) {
+          queue.push(event);
+          return snapshot;
+        }
+        processEvent(event);
+        flushQueue();
+        return snapshot;
+      }
+      if (dispatching || flushing) {
         throw new Error(
           `Reentrant send detected: cannot send "${event.type}" from within a subscriber`,
         );
       }
-      const prev = snapshot;
-      let next: S;
-      try {
-        next = machine.transition(snapshot, event);
-      } catch (err) {
-        fireOnError(err);
-        throw err;
-      }
-      if (next === prev) return;
-      snapshot = next;
-      fireOnTransition(prev, next, event);
-      dispatching = true;
-      try {
-        notify(snapshot);
-      } finally {
-        dispatching = false;
-      }
+      processEvent(event);
     },
 
     getSnapshot() {
