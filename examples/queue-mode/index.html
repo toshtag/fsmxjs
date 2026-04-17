@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Queue Mode — fsmxjs</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <a href="../" class="back-link">← examples</a>
+    </nav>
+
+    <header class="header">
+      <div class="concept-pill">Reentrant Event Safety</div>
+      <h1>Queue Mode</h1>
+      <p class="desc">
+        Without <code>queue: true</code>, calling <code>send()</code> from inside a subscriber
+        is silently dropped — the machine is mid-transition and can't accept events.
+        With queue mode enabled, those sends are enqueued and drained in order
+        once the current transition finishes. Press the button and watch the event chain unfold.
+      </p>
+    </header>
+
+    <div class="demo">
+      <div class="demo-bar">
+        <span class="demo-bar-label">event log</span>
+        <div class="demo-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="demo-body">
+        <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+          <button class="btn btn-primary" id="trigger">Send TRIGGER</button>
+          <button class="btn btn-ghost" id="clear">Clear</button>
+        </div>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+
+    <div class="use-section">
+      <div class="section-label">Use this pattern for</div>
+      <div class="use-grid">
+        <div class="use-item"><span class="use-icon">🔌</span> WebSocket message handlers that react to state changes</div>
+        <div class="use-item"><span class="use-icon">⛓</span> Subscriber chains where one transition triggers the next</div>
+        <div class="use-item"><span class="use-icon">🖱</span> Nested UI events (drag → snap → settle)</div>
+        <div class="use-item"><span class="use-icon">📦</span> Batch processing flows with chained steps</div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
