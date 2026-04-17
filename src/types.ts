@@ -69,6 +69,20 @@ export interface Snapshot<
   event: TEvent | InitEvent;
 }
 
+export type ServiceOptions<
+  TContext,
+  TEvent extends EventObject,
+  TStateValue extends string,
+> = {
+  onTransition?: (args: {
+    prev: Snapshot<TContext, TStateValue, TEvent>;
+    next: Snapshot<TContext, TStateValue, TEvent>;
+    event: TEvent | InitEvent;
+    changed: boolean;
+  }) => void;
+  onError?: (error: unknown) => void;
+};
+
 export interface Machine<
   TContext,
   TEvent extends EventObject,
