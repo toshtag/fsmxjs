@@ -49,22 +49,36 @@ const machine = createMachine<Context, Event, State>({
 const service = createService(machine);
 service.start();
 
-const steps: Record<State, HTMLElement> = {
-  step1: document.getElementById('step1')!,
-  step2: document.getElementById('step2')!,
-  review: document.getElementById('review')!,
+type StepKey = State;
+const panels: Record<StepKey, HTMLElement> = {
+  step1:     document.getElementById('step1')!,
+  step2:     document.getElementById('step2')!,
+  review:    document.getElementById('review')!,
   submitted: document.getElementById('submitted')!,
 };
-const err1El = document.getElementById('err1')!;
-const err2El = document.getElementById('err2')!;
+const bubbles = [1, 2, 3, 4].map((n) => document.getElementById(`bubble${n}`)!);
+const err1El  = document.getElementById('err1')!;
+const err2El  = document.getElementById('err2')!;
+const rNameEl = document.getElementById('rName')!;
+const rEmailEl = document.getElementById('rEmail')!;
+
+const stepOrder: StepKey[] = ['step1', 'step2', 'review', 'submitted'];
 
 function render() {
   const { value, context } = service.getSnapshot();
-  Object.entries(steps).forEach(([k, el]) => el.classList.toggle('active', k === value));
+  const idx = stepOrder.indexOf(value);
+
+  Object.entries(panels).forEach(([k, el]) => el.classList.toggle('active', k === value));
   err1El.textContent = '';
   err2El.textContent = '';
-  (document.getElementById('rName') as HTMLElement).textContent = context.name;
-  (document.getElementById('rEmail') as HTMLElement).textContent = context.email;
+  rNameEl.textContent  = context.name;
+  rEmailEl.textContent = context.email;
+
+  bubbles.forEach((b, i) => {
+    b.classList.remove('active', 'done');
+    if (i < idx) b.classList.add('done');
+    else if (i === idx) b.classList.add('active');
+  });
 }
 
 service.subscribe(render);
@@ -85,4 +99,8 @@ document.getElementById('next2')!.addEventListener('click', () => {
 document.getElementById('back2')!.addEventListener('click', () => service.send({ type: 'BACK' }));
 document.getElementById('back3')!.addEventListener('click', () => service.send({ type: 'BACK' }));
 document.getElementById('submit')!.addEventListener('click', () => service.send({ type: 'SUBMIT' }));
-document.getElementById('reset')!.addEventListener('click', () => service.send({ type: 'RESET' }));
+document.getElementById('reset')!.addEventListener('click', () => {
+  (document.getElementById('name') as HTMLInputElement).value  = '';
+  (document.getElementById('email') as HTMLInputElement).value = '';
+  service.send({ type: 'RESET' });
+});

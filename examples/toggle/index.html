@@ -3,22 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toggle — fsmxjs examples</title>
+  <title>Toggle — fsmxjs</title>
+  <link rel="stylesheet" href="../style.css" />
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 3rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.25rem; }
-    button { padding: 0.5rem 1.25rem; font-size: 1rem; cursor: pointer; }
-    .state { margin-top: 1rem; font-size: 1.5rem; font-weight: bold; }
-    .count { color: #555; margin-top: 0.25rem; }
-    a { font-size: 0.875rem; color: #0969da; }
+    .toggle-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .toggle-count {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-3);
+    }
   </style>
 </head>
 <body>
-  <a href="../">← back</a>
-  <h1>Toggle</h1>
-  <button id="btn">Toggle</button>
-  <div class="state" id="state"></div>
-  <div class="count" id="count"></div>
+  <div class="page">
+    <nav class="nav">
+      <a href="../" class="back-link">← examples</a>
+    </nav>
+
+    <header class="header">
+      <div class="concept-pill">State Transitions</div>
+      <h1>Toggle</h1>
+      <p class="desc">
+        The simplest FSM — two states, one event. The machine owns the transition logic:
+        state <code>off</code> on <code>TOGGLE</code> → <code>on</code>, and vice versa.
+        Actions attached to transitions update the context (toggle count) as a pure function.
+        No <code>if/else</code>, no scattered mutation.
+      </p>
+    </header>
+
+    <div class="demo">
+      <div class="demo-bar">
+        <span class="demo-bar-label">interactive demo</span>
+        <div class="demo-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="demo-body">
+        <div class="state-diagram">
+          <div class="snode" id="nodeOff">
+            <div class="snode-dot"></div>
+            off
+          </div>
+          <div class="sarrow">
+            <span class="sarrow-label">TOGGLE</span>
+            <div class="sarrow-line"></div>
+          </div>
+          <div class="snode" id="nodeOn">
+            <div class="snode-dot"></div>
+            on
+          </div>
+        </div>
+
+        <div class="toggle-controls">
+          <button class="btn btn-primary" id="btn">Toggle</button>
+          <span class="toggle-count" id="count">toggled 0 time(s)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="use-section">
+      <div class="section-label">Use this pattern for</div>
+      <div class="use-grid">
+        <div class="use-item"><span class="use-icon">🌓</span> Theme switcher (light / dark)</div>
+        <div class="use-item"><span class="use-icon">▶</span> Play / pause media controls</div>
+        <div class="use-item"><span class="use-icon">🔔</span> Notification settings toggles</div>
+        <div class="use-item"><span class="use-icon">🚩</span> Feature flags with side-effects</div>
+      </div>
+    </div>
+  </div>
   <script type="module" src="./main.ts"></script>
 </body>
 </html>

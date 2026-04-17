@@ -3,31 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Serialization — fsmxjs examples</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 3rem auto; padding: 0 1rem; }
-    h1 { font-size: 1.25rem; }
-    p { color: #555; font-size: 0.9rem; }
-    .count { font-size: 2rem; font-weight: bold; margin: 1rem 0; }
-    .buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    button { padding: 0.5rem 1rem; font-size: 0.9rem; cursor: pointer; }
-    .status { margin-top: 0.75rem; font-size: 0.875rem; color: #555; min-height: 1.2em; }
-    a { font-size: 0.875rem; color: #0969da; }
-  </style>
+  <title>Serialization — fsmxjs</title>
+  <link rel="stylesheet" href="../style.css" />
 </head>
 <body>
-  <a href="../">← back</a>
-  <h1>Serialization</h1>
-  <p>Snapshot is serialized to JSON and stored in localStorage. Reload and hydrate to resume.</p>
-  <div class="count" id="count">0</div>
-  <div class="buttons">
-    <button id="inc">+ Increment</button>
-    <button id="dec">− Decrement</button>
-    <button id="save">Save to localStorage</button>
-    <button id="load">Load from localStorage</button>
-    <button id="reset">Reset</button>
+  <div class="page">
+    <nav class="nav">
+      <a href="../" class="back-link">← examples</a>
+    </nav>
+
+    <header class="header">
+      <div class="concept-pill">Snapshot Persistence</div>
+      <h1>Serialization</h1>
+      <p class="desc">
+        A snapshot is a plain object: <code>{ value, context, event }</code>.
+        <code>serializeSnapshot()</code> makes it JSON-safe so you can store it anywhere —
+        localStorage, a database, or send it over the wire.
+        <code>deserializeSnapshot()</code> validates the shape and reconstructs it.
+        Increment the counter, save, reset to zero, then load to resume exactly where you left off.
+      </p>
+    </header>
+
+    <div class="demo">
+      <div class="demo-bar">
+        <span class="demo-bar-label">interactive demo</span>
+        <div class="demo-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="demo-body">
+        <div class="big-num" id="count">0</div>
+        <div class="big-sub">count</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="inc">+ Increment</button>
+          <button class="btn" id="dec">− Decrement</button>
+          <button class="btn" id="save">Save</button>
+          <button class="btn" id="load">Load</button>
+          <button class="btn btn-ghost" id="reset">Reset</button>
+        </div>
+        <div class="status-msg" id="status"></div>
+      </div>
+    </div>
+
+    <div class="use-section">
+      <div class="section-label">Use this pattern for</div>
+      <div class="use-grid">
+        <div class="use-item"><span class="use-icon">🖥</span> SSR hydration — serialize server-side, resume client-side</div>
+        <div class="use-item"><span class="use-icon">💾</span> Offline resume — persist progress across sessions</div>
+        <div class="use-item"><span class="use-icon">↩</span> Undo / redo — snapshot history as an array</div>
+        <div class="use-item"><span class="use-icon">🪟</span> Tab / window state sync via BroadcastChannel</div>
+      </div>
+    </div>
   </div>
-  <div class="status" id="status"></div>
   <script type="module" src="./main.ts"></script>
 </body>
 </html>
