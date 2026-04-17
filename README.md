@@ -291,8 +291,6 @@ function useMachine<C, E extends { type: string }, V extends string>(
 
 | Version | Status | Notes |
 |---|---|---|
-| v1.1 | Released | `onTransition` / `onError` debug hooks, improved error messages, `createMachine` config validation |
-| v1.2 | Released | `queue` option — safe reentrant sends via synchronous event queue |
 | v1.3 | Planned | Snapshot serialization (for SSR hydration) |
 | v2.0 | Planned | Optional async action helpers (separate entrypoint) |
 
