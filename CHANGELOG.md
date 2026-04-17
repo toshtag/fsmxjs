@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-04-17
+
+### Added
+
+- `createService` now accepts an optional second argument `ServiceOptions`
+- `onTransition` hook — called after every snapshot change, before subscribers; fires on `start()`, `send()`, and `stop()` when `next !== prev`
+- `onError` hook — called when internal FSM exceptions occur (entry, exit, transition actions); original error is always re-thrown; hook exceptions are swallowed to prevent masking
+- `createMachine` validates `initial` state and all transition `target` values at construction time, throwing a descriptive error on misconfiguration
+
+### Changed
+
+- `send()` now throws distinct messages for idle vs stopped state
+- `send()` now throws `Invalid event: expected { type: string }` on invalid event shape
+
 ## [1.0.0] - 2026-04-17
 
 ### Added

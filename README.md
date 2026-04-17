@@ -12,6 +12,8 @@ Inspired by [@xstate/fsm](https://github.com/statelyai/xstate/tree/main/packages
 - Snapshot referential stability — no-op returns the same reference
 - Framework-agnostic — use with React, Remix, Vue, Svelte, or plain JS
 - TypeScript-first with full generic inference
+- Debug hooks (`onTransition`, `onError`) on `createService`
+- Runtime config validation in `createMachine`
 
 ## Installation
 
@@ -84,15 +86,43 @@ const machine = createMachine({
 
 **`machine.transition(state, event)`** — Pure transition function. Returns a new `Snapshot` if the transition fires, or the same reference if it is a no-op.
 
+`createMachine` validates the config at construction time and throws a descriptive error if `initial` or any transition `target` references a state that does not exist.
+
 ---
 
-### `createService(machine)`
+### `createService(machine, options?)`
 
 Creates a stateful service that manages a machine's lifecycle.
 
 ```ts
-const service = createService(machine);
+const service = createService(machine, {
+  onTransition({ prev, next, event }) {
+    console.log(event.type, prev.value, '→', next.value);
+  },
+  onError(err) {
+    console.error('FSM error:', err);
+  },
+});
 ```
+
+#### `options.onTransition(args)`
+
+Called after every snapshot change, **before** subscribers are notified. Only fires when `next !== prev` (no-op transitions are silent).
+
+| Field | Type | Description |
+|---|---|---|
+| `prev` | `Snapshot` | Snapshot before the change |
+| `next` | `Snapshot` | Snapshot after the change |
+| `event` | `TEvent \| InitEvent` | Event that triggered the change |
+| `changed` | `true` | Always `true` — hook only fires on changes |
+
+Fires on `start()`, `send()`, and `stop()`. If the hook throws, the exception is routed to `onError` and swallowed — a buggy debug hook will not crash the service.
+
+#### `options.onError(error)`
+
+Called when an internal FSM exception occurs (entry, exit, or transition action throws). The original error is always re-thrown after `onError` returns. Also called when `onTransition` throws.
+
+If `onError` itself throws, the exception is silently swallowed to prevent masking the original error.
 
 #### `service.start()`
 
@@ -113,7 +143,8 @@ Deactivates the service. Runs the current state's exit actions, then notifies al
 
 Sends an event to the machine. If the transition fires, updates the snapshot and notifies subscribers.
 
-- Throws if the service is not running.
+- Throws if called before `start()` or after `stop()`.
+- Throws if `event` is not an object with a `type` string property.
 - Throws if called re-entrantly from within a subscriber (queue mode planned for v1.2).
 
 #### `service.subscribe(listener)`
@@ -154,6 +185,16 @@ type ActionFn<TContext, TEvent> =
 
 type GuardFn<TContext, TEvent> =
   (context: TContext, event: TEvent) => boolean;
+
+type ServiceOptions<TContext, TEvent, TStateValue extends string> = {
+  onTransition?: (args: {
+    prev:    Snapshot<TContext, TStateValue, TEvent>;
+    next:    Snapshot<TContext, TStateValue, TEvent>;
+    event:   TEvent | { type: '@@fsmx/init' };
+    changed: boolean;
+  }) => void;
+  onError?: (error: unknown) => void;
+};
 ```
 
 ---
@@ -231,14 +272,12 @@ function useMachine<C, E extends { type: string }, V extends string>(
 
 ## Roadmap
 
-| Version | Planned |
-|---|---|
-| v1.1 | `onTransition` debug hook, improved error messages |
-| v1.2 | Event queue mode (reentrant send), `autoStart` / `queueBeforeStart` option |
-| v1.3 | Snapshot serialization (for SSR hydration) |
-| v2.0 | Optional async action helpers (separate entrypoint) |
-| v3.0 | Hierarchical states (opt-in) |
-| v4.0 | Optional actor model (separate package) |
+| Version | Status | Notes |
+|---|---|---|
+| v1.1 | Released | `onTransition` / `onError` debug hooks, improved error messages, `createMachine` config validation |
+| v1.2 | Planned | Event queue mode (reentrant send) |
+| v1.3 | Planned | Snapshot serialization (for SSR hydration) |
+| v2.0 | Planned | Optional async action helpers (separate entrypoint) |
 
 ## License
 
