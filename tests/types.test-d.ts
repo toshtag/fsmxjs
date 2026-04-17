@@ -108,6 +108,7 @@ const payloadMachine = createMachine({
   createMachine({
     initial: 'idle',
     context: { count: 0 },
+    types: {} as { events: { type: 'INC' } },
     states: {
       idle: {
         on: {
@@ -160,11 +161,10 @@ const payloadMachine = createMachine({
 
 {
   const service = createService(toggleMachine);
-  type S = typeof service;
 
-  expectTypeOf<S['send']>().parameter(0).toEqualTypeOf<{ type: 'TOGGLE' }>();
+  expectTypeOf(service.send).parameter(0).toEqualTypeOf<{ type: 'TOGGLE' }>();
 
-  expectTypeOf<S['getSnapshot']>().returns.toEqualTypeOf<
+  expectTypeOf(service.getSnapshot).returns.toEqualTypeOf<
     Snapshot<{ count: number }, 'idle' | 'active', { type: 'TOGGLE' }>
   >();
 }
