@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>fsmxjs — examples</title>
+  <style>
+    .site-header { margin-bottom: 3rem; }
+    .wordmark {
+      font-family: var(--display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+    .wordmark span { color: var(--text-3); font-weight: 400; }
+    .tagline { color: var(--text-2); font-size: 0.9375rem; max-width: 420px; }
+
+    .divider { height: 1px; background: var(--border); margin: 2rem 0; }
+
+    .scenario-list { display: flex; flex-direction: column; gap: 0; }
+    .scenario-link {
+      display: grid;
+      grid-template-columns: 2.5rem 1fr auto;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      transition: background 0.12s;
+      border-radius: var(--r);
+      margin: 0 -0.5rem;
+      padding-left: 0.5rem;
+      padding-right: 0.75rem;
+    }
+    .scenario-link:hover { background: var(--surface); }
+    .scenario-link:hover .arrow { color: var(--text); }
+
+    .scenario-num {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+    }
+    .scenario-info {}
+    .scenario-title {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+    }
+    .scenario-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+    }
+    .scenario-desc { font-size: 0.8125rem; color: var(--text-2); }
+    .scenario-tag {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 100px;
+      padding: 0.1rem 0.5rem;
+      white-space: nowrap;
+    }
+    .arrow {
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      color: var(--text-3);
+      transition: color 0.12s;
+    }
+  </style>
+  <link rel="stylesheet" crossorigin href="/fsmxjs/assets/style-8FzXGuiG.css">
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="wordmark">fsmxjs <span>/ examples</span></div>
+      <p class="tagline">Five interactive demos showing how finite state machines handle the complexity that ad-hoc flags and conditionals can't.</p>
+    </header>
+
+    <div class="divider"></div>
+
+    <nav class="scenario-list">
+      <a href="./toggle/" class="scenario-link">
+        <span class="scenario-num">01</span>
+        <div class="scenario-info">
+          <div class="scenario-title">Toggle</div>
+          <div class="scenario-meta">
+            <span class="scenario-desc">Two states, one event, transition actions</span>
+            <span class="scenario-tag">State transitions</span>
+          </div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+
+      <a href="./form-wizard/" class="scenario-link">
+        <span class="scenario-num">02</span>
+        <div class="scenario-info">
+          <div class="scenario-title">Form Wizard</div>
+          <div class="scenario-meta">
+            <span class="scenario-desc">Multi-step form with validation guards</span>
+            <span class="scenario-tag">Guards</span>
+          </div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+
+      <a href="./queue-mode/" class="scenario-link">
+        <span class="scenario-num">03</span>
+        <div class="scenario-info">
+          <div class="scenario-title">Queue Mode</div>
+          <div class="scenario-meta">
+            <span class="scenario-desc">Safe sends from within subscriber callbacks</span>
+            <span class="scenario-tag">queue: true</span>
+          </div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+
+      <a href="./serialization/" class="scenario-link">
+        <span class="scenario-num">04</span>
+        <div class="scenario-info">
+          <div class="scenario-title">Serialization</div>
+          <div class="scenario-meta">
+            <span class="scenario-desc">Snapshot persistence and hydration</span>
+            <span class="scenario-tag">serializeSnapshot</span>
+          </div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+
+      <a href="./async-search/" class="scenario-link" style="border-bottom: none;">
+        <span class="scenario-num">05</span>
+        <div class="scenario-info">
+          <div class="scenario-title">Async Search</div>
+          <div class="scenario-meta">
+            <span class="scenario-desc">takeLatest cancellation with @fsmxjs/async</span>
+            <span class="scenario-tag">@fsmxjs/async</span>
+          </div>
+        </div>
+        <span class="arrow">›</span>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>
