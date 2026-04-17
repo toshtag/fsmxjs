@@ -280,4 +280,41 @@ describe('createMachine', () => {
       expect(next).not.toBe(snapshot);
     });
   });
+
+  describe('config validation', () => {
+    it('throws when initial state does not exist in states', () => {
+      expect(() =>
+        createMachine({
+          initial: 'nonexistent' as never,
+          context: {},
+          states: { idle: {} },
+        }),
+      ).toThrow('createMachine: initial state "nonexistent" does not exist in states');
+    });
+
+    it('throws when a transition target does not exist in states', () => {
+      expect(() =>
+        createMachine({
+          initial: 'idle',
+          context: {},
+          states: {
+            idle: { on: { GO: { target: 'ghost' as never } } },
+          },
+        }),
+      ).toThrow('createMachine: transition target "ghost"');
+    });
+
+    it('does not throw when config is valid', () => {
+      expect(() =>
+        createMachine({
+          initial: 'idle',
+          context: {},
+          states: {
+            idle: { on: { GO: { target: 'active' } } },
+            active: {},
+          },
+        }),
+      ).not.toThrow();
+    });
+  });
 });
