@@ -20,9 +20,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:types": "vitest typecheck --run",
-    "lint": "eslint src tests",
-    "format": "prettier --write src tests",
-    "format:check": "prettier --check src tests",
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "docs:api": "typedoc",
     "prepublishOnly": "pnpm run lint && pnpm run typecheck && pnpm test && pnpm run build"
