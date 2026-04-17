@@ -145,6 +145,27 @@ export function createMachine<
     };
   }
 
+  if (!(resolvedConfig.initial in resolvedConfig.states)) {
+    throw new Error(
+      `createMachine: initial state "${resolvedConfig.initial}" does not exist in states`,
+    );
+  }
+
+  for (const stateName of Object.keys(resolvedConfig.states)) {
+    const node = resolvedConfig.states[stateName as ResolvedState];
+    if (!node?.on) continue;
+    for (const eventType of Object.keys(node.on)) {
+      const tv = (node.on as Record<string, TransitionValue<TContext, ResolvedEvent, ResolvedState>>)[eventType];
+      for (const t of normalizeTransitions<TContext, ResolvedEvent, ResolvedState>(tv)) {
+        if (t.target !== undefined && !(t.target in resolvedConfig.states)) {
+          throw new Error(
+            `createMachine: transition target "${t.target}" in state "${stateName}" on "${eventType}" does not exist`,
+          );
+        }
+      }
+    }
+  }
+
   return {
     config: resolvedConfig,
     initialState,
