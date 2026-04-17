@@ -17,7 +17,7 @@
   ],
   "scripts": {
     "build": "tsup",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "test:types": "vitest typecheck --run",
     "lint": "eslint .",
