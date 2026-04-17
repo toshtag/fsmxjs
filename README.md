@@ -15,6 +15,7 @@ Inspired by [@xstate/fsm](https://github.com/statelyai/xstate/tree/main/packages
 - Debug hooks (`onTransition`, `onError`) on `createService`
 - Optional queue mode for safe reentrant sends
 - Runtime config validation in `createMachine`
+- Snapshot serialization for SSR hydration and persistence
 
 ## Installation
 
@@ -187,6 +188,50 @@ Returns the current `Snapshot` synchronously. Safe to call before `start()`.
 
 ---
 
+### `serializeSnapshot(snapshot)`
+
+Serializes a `Snapshot` to a JSON string. Preserves `value`, `context`, and `event`.
+
+```ts
+import { serializeSnapshot, deserializeSnapshot } from 'fsmxjs';
+
+const json = serializeSnapshot(service.getSnapshot());
+// '{"value":"active","context":{"count":3},"event":{"type":"INC"}}'
+```
+
+**Limitations:** `Date` instances in `context` are restored as ISO strings, not `Date` objects. `Map`, `Set`, and custom class instances lose their prototype identity. These are intentional JSON round-trip trade-offs.
+
+---
+
+### `deserializeSnapshot(serialized)`
+
+Parses a JSON string produced by `serializeSnapshot` back into a typed `Snapshot`. Generic parameters mirror those of `Snapshot`.
+
+```ts
+const snapshot = deserializeSnapshot<Ctx, StateValue, Event>(json);
+```
+
+- Throws `SyntaxError` if `serialized` is not valid JSON.
+- Throws `Error` (`"deserializeSnapshot: invalid snapshot shape"`) if the parsed value is missing required fields (`value`, `context`, `event.type`).
+
+**SSR hydration example (Remix):**
+
+```ts
+// server: loader
+export const loader = () => {
+  const service = createService(machine).start();
+  return json({ state: serializeSnapshot(service.getSnapshot()) });
+};
+
+// client: hydration
+const { state } = useLoaderData<typeof loader>();
+const snapshot = deserializeSnapshot<Ctx, StateValue, Event>(state);
+const service = createService(machine).start();
+// restore state if needed via comparison with snapshot.value / snapshot.context
+```
+
+---
+
 ### Types
 
 ```ts
@@ -291,7 +336,6 @@ function useMachine<C, E extends { type: string }, V extends string>(
 
 | Version | Status | Notes |
 |---|---|---|
-| v1.3 | Planned | Snapshot serialization (for SSR hydration) |
 | v2.0 | Planned | Optional async action helpers (separate entrypoint) |
 
 ## License

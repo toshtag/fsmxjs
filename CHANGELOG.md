@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-04-17
+
+### Added
+
+- `serializeSnapshot(snapshot)` — serializes a `Snapshot` to a JSON string; preserves `value`, `context`, and `event` fields
+- `deserializeSnapshot(serialized)` — deserializes a JSON string back to a `Snapshot` with generic type parameters for full TypeScript inference
+- Runtime shape validation in `deserializeSnapshot`: throws `Error` on invalid snapshot shape, and propagates `SyntaxError` on malformed JSON
+
+### Notes
+
+- JSON round-trip limitations: `Date` instances in `context` are restored as ISO strings, not `Date` objects. `Map`, `Set`, and custom class instances lose their prototype identity. These are intentional trade-offs of the JSON-based format.
+
 ## [1.2.0] - 2026-04-17
 
 ### Added
