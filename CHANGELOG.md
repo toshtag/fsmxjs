@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-04-17
+
+### Fixed
+
+- No-op transitions (same state value, unchanged context) now return the original snapshot reference instead of allocating a new object. Subscribers using strict equality checks are no longer notified on no-op transitions.
+
 ## [1.3.1] - 2026-04-17
 
 ### Changed
