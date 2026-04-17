@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ServiceOptions.queue` — optional boolean flag to enable queue mode for reentrant sends
+- When `queue: true`, calls to `send()` from within a subscriber or flush loop are enqueued and processed sequentially after the current event completes, instead of throwing
+- `send()` in queue mode returns the snapshot at enqueue time (not the post-flush snapshot)
+- Calling `stop()` during a flush immediately clears the queue; remaining enqueued events are discarded and their transitions and hooks are never fired
+
 ## [1.1.0] - 2026-04-17
 
 ### Added
