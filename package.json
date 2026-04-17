@@ -25,7 +25,12 @@
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "docs:api": "typedoc",
-    "prepublishOnly": "pnpm run lint && pnpm run typecheck && pnpm test && pnpm run build"
+    "prepublishOnly": "pnpm run lint && pnpm run typecheck && pnpm test && pnpm run build",
+    "test:async": "vitest run --config packages/async/vitest.config.ts",
+    "test:async:types": "vitest run --typecheck.only --config packages/async/vitest.config.ts",
+    "test:async:watch": "vitest --config packages/async/vitest.config.ts",
+    "build:async": "tsup --config packages/async/tsup.config.ts",
+    "typecheck:async": "tsc -p packages/async/tsconfig.json --noEmit"
   },
   "keywords": [
     "fsm",
