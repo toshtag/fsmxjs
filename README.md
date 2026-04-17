@@ -2,6 +2,8 @@
 
 Minimal, framework-agnostic finite state machine library for TypeScript.
 
+**[Live examples →](https://toshtag.github.io/fsmxjs/)**
+
 Originally inspired by [@xstate/fsm](https://github.com/statelyai/xstate/tree/main/packages/xstate-fsm), but evolved into a distinct design: synchronous-only core, async handled entirely outside via companion packages, and explicit rejection of actor/invoke semantics.
 
 ## Features
@@ -506,6 +508,7 @@ inputEl.addEventListener('input', () => {
 | v1.2 | Queue mode, explicit stop-during-flush semantics |
 | v1.3 | Snapshot serialization (`serializeSnapshot`, `deserializeSnapshot`) |
 | v2.0 milestone | `@fsmxjs/async` introduced; core remains async-free |
+| v2.x (ongoing) | Interactive examples site — [toshtag.github.io/fsmxjs](https://toshtag.github.io/fsmxjs/) |
 
 ### v2.x — near-term maintenance track
 
@@ -516,11 +519,6 @@ inputEl.addEventListener('input', () => {
   - test structure cleanup
   - build/test script simplification
   - hot-path profiling and micro-optimizations only where justified
-- Public demo/examples site
-  - minimal interactive examples
-  - queue mode demo
-  - serialization / hydration demo
-  - async task manager demo
 
 ### v3 (tentative)
 
