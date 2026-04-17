@@ -13,6 +13,7 @@ Inspired by [@xstate/fsm](https://github.com/statelyai/xstate/tree/main/packages
 - Framework-agnostic — use with React, Remix, Vue, Svelte, or plain JS
 - TypeScript-first with full generic inference
 - Debug hooks (`onTransition`, `onError`) on `createService`
+- Optional queue mode for safe reentrant sends
 - Runtime config validation in `createMachine`
 
 ## Installation
@@ -124,6 +125,21 @@ Called when an internal FSM exception occurs (entry, exit, or transition action 
 
 If `onError` itself throws, the exception is silently swallowed to prevent masking the original error.
 
+#### `options.queue`
+
+Set `queue: true` to enable queue mode. In queue mode, calls to `send()` from within a subscriber or flush loop are enqueued and processed sequentially after the current event completes, rather than throwing.
+
+```ts
+const service = createService(machine, { queue: true }).start();
+
+service.subscribe(() => {
+  service.send({ type: 'NEXT' }); // enqueued, not thrown
+});
+```
+
+- `send()` called during a flush returns the snapshot **at enqueue time**, not the post-flush snapshot. Use `getSnapshot()` after the outer `send()` returns to read the final state.
+- Calling `stop()` during a flush immediately clears the queue — remaining events are discarded.
+
 #### `service.start()`
 
 Activates the service. Runs the current state's entry actions, then notifies all subscribers. Returns `this` (chainable).
@@ -145,7 +161,7 @@ Sends an event to the machine. If the transition fires, updates the snapshot and
 
 - Throws if called before `start()` or after `stop()`.
 - Throws if `event` is not an object with a `type` string property.
-- Throws if called re-entrantly from within a subscriber (queue mode planned for v1.2).
+- Throws if called re-entrantly from within a subscriber (use `queue: true` to allow reentrant sends).
 
 #### `service.subscribe(listener)`
 
@@ -194,6 +210,7 @@ type ServiceOptions<TContext, TEvent, TStateValue extends string> = {
     changed: boolean;
   }) => void;
   onError?: (error: unknown) => void;
+  queue?:   boolean;
 };
 ```
 
@@ -275,7 +292,7 @@ function useMachine<C, E extends { type: string }, V extends string>(
 | Version | Status | Notes |
 |---|---|---|
 | v1.1 | Released | `onTransition` / `onError` debug hooks, improved error messages, `createMachine` config validation |
-| v1.2 | Planned | Event queue mode (reentrant send) |
+| v1.2 | Released | `queue` option — safe reentrant sends via synchronous event queue |
 | v1.3 | Planned | Snapshot serialization (for SSR hydration) |
 | v2.0 | Planned | Optional async action helpers (separate entrypoint) |
 
