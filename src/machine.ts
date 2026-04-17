@@ -106,11 +106,7 @@ export function createMachine<
 
     if (!on || !(event.type in on)) return state;
 
-    const candidates = normalizeTransitions<
-      TContext,
-      ResolvedEvent,
-      ResolvedState
-    >(on[event.type]);
+    const candidates = normalizeTransitions(on[event.type]);
 
     const matched = candidates.find(
       (t) => t.guard === undefined || t.guard(state.context, event),
@@ -145,26 +141,29 @@ export function createMachine<
     };
   }
 
-  if (!(resolvedConfig.initial in resolvedConfig.states)) {
-    throw new Error(
-      `createMachine: initial state "${resolvedConfig.initial}" does not exist in states`,
-    );
-  }
-
-  for (const stateName of Object.keys(resolvedConfig.states)) {
-    const node = resolvedConfig.states[stateName as ResolvedState];
-    if (!node?.on) continue;
-    for (const eventType of Object.keys(node.on)) {
-      const tv = (node.on as Record<string, TransitionValue<TContext, ResolvedEvent, ResolvedState>>)[eventType];
-      for (const t of normalizeTransitions<TContext, ResolvedEvent, ResolvedState>(tv)) {
-        if (t.target !== undefined && !(t.target in resolvedConfig.states)) {
-          throw new Error(
-            `createMachine: transition target "${t.target}" in state "${stateName}" on "${eventType}" does not exist`,
-          );
+  function validateConfig(): void {
+    if (!(resolvedConfig.initial in resolvedConfig.states)) {
+      throw new Error(
+        `createMachine: initial state "${resolvedConfig.initial}" does not exist in states`,
+      );
+    }
+    for (const stateName of Object.keys(resolvedConfig.states)) {
+      const node = resolvedConfig.states[stateName as ResolvedState];
+      if (!node?.on) continue;
+      const on = node.on as Record<string, TransitionValue<TContext, ResolvedEvent, ResolvedState>>;
+      for (const eventType of Object.keys(on)) {
+        for (const t of normalizeTransitions(on[eventType])) {
+          if (t.target !== undefined && !(t.target in resolvedConfig.states)) {
+            throw new Error(
+              `createMachine: transition target "${t.target}" in state "${stateName}" on "${eventType}" does not exist`,
+            );
+          }
         }
       }
     }
   }
+
+  validateConfig();
 
   return {
     config: resolvedConfig,
