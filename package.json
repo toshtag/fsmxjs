@@ -19,7 +19,7 @@
     "build": "tsup",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
-    "test:types": "vitest typecheck --run",
+    "test:types": "vitest run --typecheck.only",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"tests/**/*.ts\"",
