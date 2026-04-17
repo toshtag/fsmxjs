@@ -83,6 +83,26 @@ export function createService<
     }
   }
 
+  function processEvent(event: TEvent): void {
+    const prev = snapshot;
+    let next: S;
+    try {
+      next = machine.transition(snapshot, event);
+    } catch (err) {
+      fireOnError(err);
+      throw err;
+    }
+    if (next === prev) return;
+    snapshot = next;
+    fireOnTransition(prev, next, event);
+    dispatching = true;
+    try {
+      notify(snapshot);
+    } finally {
+      dispatching = false;
+    }
+  }
+
   const service: Service<TContext, TEvent, TStateValue> = {
     start() {
       if (status === 'running') return service;
@@ -136,23 +156,7 @@ export function createService<
           `Reentrant send detected: cannot send "${event.type}" from within a subscriber`,
         );
       }
-      const prev = snapshot;
-      let next: S;
-      try {
-        next = machine.transition(snapshot, event);
-      } catch (err) {
-        fireOnError(err);
-        throw err;
-      }
-      if (next === prev) return;
-      snapshot = next;
-      fireOnTransition(prev, next, event);
-      dispatching = true;
-      try {
-        notify(snapshot);
-      } finally {
-        dispatching = false;
-      }
+      processEvent(event);
     },
 
     getSnapshot() {
