@@ -8,6 +8,7 @@ export type {
   InitEvent,
   Machine,
   MachineConfig,
+  ServiceOptions,
   Snapshot,
   StateNodeConfig,
   TransitionConfig,

@@ -335,4 +335,212 @@ describe('createService', () => {
       expect(service.getSnapshot()).toBe(before);
     });
   });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type AnyOptions = any;
+
+  describe('ServiceOptions: onTransition', () => {
+    it('is called when start causes entry to change context', () => {
+      const cb = vi.fn();
+      const service = createService(toggleMachine, { onTransition: cb } as AnyOptions);
+      service.start();
+      expect(cb).toHaveBeenCalledTimes(1);
+    });
+
+    it('is not called when start does not change context', () => {
+      const machine = createMachine({
+        initial: 'idle',
+        context: {},
+        states: { idle: {} },
+      });
+      const cb = vi.fn();
+      const service = createService(machine, { onTransition: cb } as AnyOptions);
+      service.start();
+      expect(cb).not.toHaveBeenCalled();
+    });
+
+    it('fires before subscribers on start', () => {
+      const order: string[] = [];
+      const service = createService(toggleMachine, {
+        onTransition: () => { order.push('hook'); },
+      } as AnyOptions);
+      service.subscribe(() => { order.push('subscriber'); });
+      service.start();
+      expect(order).toEqual(['hook', 'subscriber']);
+    });
+
+    it('receives correct prev/next/event args on start', () => {
+      const cb = vi.fn();
+      const service = createService(toggleMachine, { onTransition: cb } as AnyOptions);
+      const before = service.getSnapshot();
+      service.start();
+      const after = service.getSnapshot();
+      expect(cb).toHaveBeenCalledWith({ prev: before, next: after, event: { type: '@@fsmx/init' }, changed: true });
+    });
+
+    it('is called on send when state changes', () => {
+      const cb = vi.fn();
+      const service = createService(toggleMachine, { onTransition: cb } as AnyOptions).start();
+      cb.mockClear();
+      service.send({ type: 'TOGGLE' });
+      expect(cb).toHaveBeenCalledTimes(1);
+    });
+
+    it('is not called on no-op send', () => {
+      const cb = vi.fn();
+      const service = createService(toggleMachine, { onTransition: cb } as AnyOptions).start();
+      cb.mockClear();
+      service.send({ type: 'UNKNOWN' as never });
+      expect(cb).not.toHaveBeenCalled();
+    });
+
+    it('fires before subscribers on send', () => {
+      const order: string[] = [];
+      const service = createService(toggleMachine, {
+        onTransition: () => { order.push('hook'); },
+      } as AnyOptions).start();
+      order.length = 0;
+      service.subscribe(() => { order.push('subscriber'); });
+      service.send({ type: 'TOGGLE' });
+      expect(order).toEqual(['hook', 'subscriber']);
+    });
+
+    it('receives correct prev/next/event args on send', () => {
+      const cb = vi.fn();
+      const service = createService(toggleMachine, { onTransition: cb } as AnyOptions).start();
+      cb.mockClear();
+      const prev = service.getSnapshot();
+      service.send({ type: 'TOGGLE' });
+      const next = service.getSnapshot();
+      expect(cb).toHaveBeenCalledWith({ prev, next, event: { type: 'TOGGLE' }, changed: true });
+    });
+
+    it('is called when stop causes exit to change context', () => {
+      const cb = vi.fn();
+      const service = createService(toggleMachine, { onTransition: cb } as AnyOptions).start();
+      cb.mockClear();
+      service.stop();
+      expect(cb).toHaveBeenCalledTimes(1);
+    });
+
+    it('is not called when stop does not change context', () => {
+      const machine = createMachine({
+        initial: 'idle',
+        context: {},
+        states: { idle: {} },
+      });
+      const cb = vi.fn();
+      const service = createService(machine, { onTransition: cb } as AnyOptions).start();
+      cb.mockClear();
+      service.stop();
+      expect(cb).not.toHaveBeenCalled();
+    });
+
+    it('fires before subscribers on stop', () => {
+      const order: string[] = [];
+      const service = createService(toggleMachine, {
+        onTransition: () => { order.push('hook'); },
+      } as AnyOptions).start();
+      order.length = 0;
+      service.subscribe(() => { order.push('subscriber'); });
+      service.stop();
+      expect(order).toEqual(['hook', 'subscriber']);
+    });
+
+    it('throw from onTransition is swallowed and notify still fires', () => {
+      const listener = vi.fn();
+      const service = createService(toggleMachine, {
+        onTransition: () => { throw new Error('hook error'); },
+      } as AnyOptions).start();
+      service.subscribe(listener);
+      listener.mockClear();
+      expect(() => service.send({ type: 'TOGGLE' })).not.toThrow();
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('ServiceOptions: onError', () => {
+    it('is called when entry throws and original error propagates', () => {
+      const machine = createMachine({
+        initial: 'idle',
+        context: {},
+        states: {
+          idle: {
+            entry: () => { throw new Error('entry error'); },
+            on: { PING: {} },
+          },
+        },
+      });
+      const onError = vi.fn();
+      const service = createService(machine, { onError } as AnyOptions);
+      expect(() => service.start()).toThrow('entry error');
+      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('is called when exit throws and original error propagates', () => {
+      const machine = createMachine({
+        initial: 'idle',
+        context: {},
+        states: {
+          idle: {
+            exit: () => { throw new Error('exit error'); },
+            on: { PING: {} },
+          },
+        },
+      });
+      const onError = vi.fn();
+      const service = createService(machine, { onError } as AnyOptions).start();
+      expect(() => service.stop()).toThrow('exit error');
+      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('is called when transition action throws and original error propagates', () => {
+      const machine = createMachine({
+        initial: 'idle',
+        context: {},
+        states: {
+          idle: {
+            on: {
+              BOOM: { actions: () => { throw new Error('action error'); } },
+            },
+          },
+        },
+      });
+      const onError = vi.fn();
+      const service = createService(machine, { onError } as AnyOptions).start();
+      expect(() => service.send({ type: 'BOOM' })).toThrow('action error');
+      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+    });
+
+    it('is called when onTransition throws and FSM state is updated', () => {
+      const onError = vi.fn();
+      const service = createService(toggleMachine, {
+        onTransition: () => { throw new Error('hook error'); },
+        onError,
+      } as AnyOptions).start();
+      onError.mockClear();
+      const before = service.getSnapshot();
+      service.send({ type: 'TOGGLE' });
+      expect(onError).toHaveBeenCalledWith(expect.any(Error));
+      expect(service.getSnapshot()).not.toBe(before);
+    });
+  });
+
+  describe('send: improved error messages', () => {
+    it('throws mentioning "not been started" when sending before start', () => {
+      const service = createService(toggleMachine);
+      expect(() => service.send({ type: 'TOGGLE' })).toThrow('service has not been started');
+    });
+
+    it('throws mentioning "has been stopped" when sending after stop', () => {
+      const service = createService(toggleMachine).start();
+      service.stop();
+      expect(() => service.send({ type: 'TOGGLE' })).toThrow('service has been stopped');
+    });
+
+    it('throws on invalid event shape missing type', () => {
+      const service = createService(toggleMachine).start();
+      expect(() => service.send(null as never)).toThrow('Invalid event: expected { type: string }');
+    });
+  });
 });

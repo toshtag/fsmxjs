@@ -1,4 +1,4 @@
-import type { EventObject, Machine, Snapshot } from './types';
+import type { EventObject, Machine, ServiceOptions, Snapshot } from './types';
 
 type Status = 'idle' | 'running' | 'stopped';
 
@@ -28,6 +28,7 @@ export function createService<
   TStateValue extends string,
 >(
   machine: Machine<TContext, TEvent, TStateValue>,
+  options?: ServiceOptions<TContext, TEvent, TStateValue>,
 ): Service<TContext, TEvent, TStateValue> {
   type S = Snapshot<TContext, TStateValue, TEvent>;
 
@@ -70,18 +71,34 @@ export function createService<
     return ctx === snap.context ? snap : { ...snap, context: ctx };
   }
 
+  function fireOnError(err: unknown): void {
+    try { options?.onError?.(err); } catch { /* swallow */ }
+  }
+
+  function fireOnTransition(prev: S, next: S, event: S['event']): void {
+    try {
+      options?.onTransition?.({ prev, next, event, changed: true });
+    } catch (hookErr) {
+      fireOnError(hookErr);
+    }
+  }
+
   const service: Service<TContext, TEvent, TStateValue> = {
     start() {
       if (status === 'running') return service;
       const prevStatus = status;
       status = 'running';
+      const prev = snapshot;
+      let next: S;
       try {
-        const next = applyEntry(snapshot);
-        snapshot = next;
+        next = applyEntry(snapshot);
       } catch (err) {
         status = prevStatus;
+        fireOnError(err);
         throw err;
       }
+      snapshot = next;
+      if (next !== prev) fireOnTransition(prev, next, next.event);
       notify(snapshot);
       return service;
     },
@@ -89,32 +106,47 @@ export function createService<
     stop() {
       if (status !== 'running') return service;
       status = 'stopped';
+      const prev = snapshot;
       let next: S;
       try {
         next = applyExit(snapshot);
       } catch (err) {
         status = 'running';
+        fireOnError(err);
         throw err;
       }
       snapshot = next;
+      if (next !== prev) fireOnTransition(prev, next, next.event);
       notify(snapshot);
       return service;
     },
 
     send(event: TEvent) {
-      if (status !== 'running') {
-        throw new Error(
-          `Cannot send event "${event.type}" to a service that is not running (status: "${status}")`,
-        );
+      if (typeof (event as { type?: unknown })?.type !== 'string') {
+        throw new Error(`Invalid event: expected { type: string }`);
+      }
+      if (status === 'idle') {
+        throw new Error(`Cannot send "${event.type}": service has not been started`);
+      }
+      if (status === 'stopped') {
+        throw new Error(`Cannot send "${event.type}": service has been stopped`);
       }
       if (dispatching) {
         throw new Error(
           `Reentrant send detected: cannot send "${event.type}" from within a subscriber`,
         );
       }
-      const next = machine.transition(snapshot, event);
-      if (next === snapshot) return;
+      const prev = snapshot;
+      let next: S;
+      try {
+        next = machine.transition(snapshot, event);
+      } catch (err) {
+        fireOnError(err);
+        throw err;
+      }
+      if (next === prev) return;
       snapshot = next;
+      fireOnTransition(prev, next, event);
       dispatching = true;
       try {
         notify(snapshot);
