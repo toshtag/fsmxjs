@@ -1,0 +1,33 @@
+{
+  "name": "@fsmxjs/async",
+  "version": "1.0.0",
+  "description": "Async task helpers for fsmxjs",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "fsm",
+    "state-machine",
+    "finite-state-machine",
+    "typescript",
+    "async"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "fsmxjs": ">=1.3.0"
+  }
+}
