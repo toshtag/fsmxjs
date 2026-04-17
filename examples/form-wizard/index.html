@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Form Wizard — fsmxjs</title>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+    .btn-row-spaced { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <nav class="nav">
+      <a href="../" class="back-link">← examples</a>
+    </nav>
+
+    <header class="header">
+      <div class="concept-pill">Guards &amp; Sequential States</div>
+      <h1>Form Wizard</h1>
+      <p class="desc">
+        Guards let transitions fire only when a condition holds.
+        The machine advances to the next step only when validation passes —
+        correctness is encoded in the state graph, not scattered across event handlers.
+        The UI just sends events and reads state.
+      </p>
+    </header>
+
+    <div class="demo">
+      <div class="demo-bar">
+        <span class="demo-bar-label">interactive demo</span>
+        <div class="demo-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="demo-body">
+
+        <!-- Step indicator -->
+        <div class="steps" id="stepIndicator">
+          <div class="step-bubble" id="bubble1">1</div>
+          <div class="step-line"></div>
+          <div class="step-bubble" id="bubble2">2</div>
+          <div class="step-line"></div>
+          <div class="step-bubble" id="bubble3">R</div>
+          <div class="step-line"></div>
+          <div class="step-bubble" id="bubble4">✓</div>
+        </div>
+
+        <!-- Step 1: Name -->
+        <div id="step1" class="step-panel">
+          <div class="field">
+            <label class="field-label" for="name">name</label>
+            <input class="field-input" id="name" type="text" placeholder="Your name" autocomplete="off" />
+            <div class="field-error" id="err1"></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="next1">Next →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Email -->
+        <div id="step2" class="step-panel">
+          <div class="field">
+            <label class="field-label" for="email">email</label>
+            <input class="field-input" id="email" type="text" placeholder="you@example.com" autocomplete="off" />
+            <div class="field-error" id="err2"></div>
+          </div>
+          <div class="btn-row-spaced">
+            <button class="btn btn-ghost" id="back2">← Back</button>
+            <button class="btn btn-primary" id="next2">Review →</button>
+          </div>
+        </div>
+
+        <!-- Review -->
+        <div id="review" class="step-panel">
+          <div class="review-grid">
+            <div class="review-row">
+              <div class="review-key">name</div>
+              <div class="review-val" id="rName"></div>
+            </div>
+            <div class="review-row">
+              <div class="review-key">email</div>
+              <div class="review-val" id="rEmail"></div>
+            </div>
+          </div>
+          <div class="btn-row-spaced" style="margin-top:1.25rem">
+            <button class="btn btn-ghost" id="back3">← Back</button>
+            <button class="btn btn-primary" id="submit">Submit</button>
+          </div>
+        </div>
+
+        <!-- Submitted -->
+        <div id="submitted" class="step-panel">
+          <div class="submitted-wrap">
+            <div class="submitted-badge">✓ Submitted</div>
+            <button class="btn" id="reset">Start over</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="use-section">
+      <div class="section-label">Use this pattern for</div>
+      <div class="use-grid">
+        <div class="use-item"><span class="use-icon">🛒</span> Checkout flows with step validation</div>
+        <div class="use-item"><span class="use-icon">👤</span> Onboarding wizards</div>
+        <div class="use-item"><span class="use-icon">⚙️</span> Configuration screens</div>
+        <div class="use-item"><span class="use-icon">📋</span> Multi-step modals and forms</div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
