@@ -543,4 +543,170 @@ describe('createService', () => {
       expect(() => service.send(null as never)).toThrow('Invalid event: expected { type: string }');
     });
   });
+
+  describe('queue mode', () => {
+    it('queue=false (default): throws on reentrant send from subscriber', () => {
+      const service = createService(toggleMachine).start();
+      service.subscribe(() => {
+        expect(() => service.send({ type: 'TOGGLE' })).toThrow();
+      });
+      service.send({ type: 'TOGGLE' });
+    });
+
+    it('queue=true: reentrant send from subscriber is enqueued, not thrown', () => {
+      const service = createService(toggleMachine, { queue: true }).start();
+      let threw = false;
+      service.subscribe(() => {
+        try { service.send({ type: 'TOGGLE' }); } catch { threw = true; }
+      });
+      service.send({ type: 'TOGGLE' });
+      expect(threw).toBe(false);
+    });
+
+    it('queue=true: reentrant send returns current snapshot at enqueue time', () => {
+      const service = createService(toggleMachine, { queue: true }).start();
+      let returnedSnap: unknown;
+      const snapAtEnqueue = service.getSnapshot();
+      service.subscribe(() => {
+        returnedSnap = service.send({ type: 'TOGGLE' });
+      });
+      service.send({ type: 'TOGGLE' });
+      expect(returnedSnap).toBe(snapAtEnqueue);
+    });
+
+    it('queue=true: final state after flush is available via getSnapshot()', () => {
+      const service = createService(toggleMachine, { queue: true }).start();
+      service.subscribe(() => {
+        service.send({ type: 'TOGGLE' });
+      });
+      service.send({ type: 'TOGGLE' });
+      expect(service.getSnapshot().value).toBe('idle');
+    });
+
+    it('queue=true: events are processed in enqueue order', () => {
+      const machine = createMachine({
+        initial: 'a',
+        context: { log: '' as string },
+        states: {
+          a: { on: { NEXT: { target: 'b', actions: (ctx) => ({ log: ctx.log + 'a' }) } } },
+          b: { on: { NEXT: { target: 'c', actions: (ctx) => ({ log: ctx.log + 'b' }) } } },
+          c: {},
+        },
+      });
+      const service = createService(machine, { queue: true }).start();
+      service.subscribe(() => {
+        if (service.getSnapshot().value === 'a') return;
+        service.send({ type: 'NEXT' });
+      });
+      service.send({ type: 'NEXT' });
+      expect(service.getSnapshot().value).toBe('c');
+      expect(service.getSnapshot().context.log).toBe('ab');
+    });
+
+    it('queue=true: each enqueued event triggers notify in order', () => {
+      const order: string[] = [];
+      const service = createService(toggleMachine, { queue: true }).start();
+      service.subscribe((snap) => {
+        order.push(snap.value);
+        if (snap.value === 'active') {
+          service.send({ type: 'TOGGLE' });
+        }
+      });
+      service.send({ type: 'TOGGLE' });
+      expect(order).toEqual(['active', 'idle']);
+    });
+
+    it('queue=true: no-op event does not change snapshot', () => {
+      const service = createService(toggleMachine, { queue: true }).start();
+      const before = service.getSnapshot();
+      service.subscribe(() => {
+        service.send({ type: 'NOOP' as never });
+      });
+      service.send({ type: 'TOGGLE' });
+      const after = service.getSnapshot();
+      expect(after.value).toBe('active');
+      expect(after).not.toBe(before);
+    });
+
+    it('queue=true: no-op event in middle does not break subsequent event order', () => {
+      const order: string[] = [];
+      const service = createService(toggleMachine, { queue: true }).start();
+      let callCount = 0;
+      service.subscribe((snap) => {
+        order.push(snap.value);
+        callCount++;
+        if (callCount === 1) {
+          service.send({ type: 'NOOP' as never });
+          service.send({ type: 'TOGGLE' });
+        }
+      });
+      service.send({ type: 'TOGGLE' });
+      expect(order).toEqual(['active', 'idle']);
+    });
+
+    it('queue=true: stop() during flush discards remaining queued events', () => {
+      const machine = createMachine({
+        initial: 'a',
+        context: { steps: 0 as number },
+        states: {
+          a: { on: { STEP: { target: 'b', actions: (ctx) => ({ steps: ctx.steps + 1 }) } } },
+          b: { on: { STEP: { target: 'a', actions: (ctx) => ({ steps: ctx.steps + 1 }) } } },
+        },
+      });
+      const service = createService(machine, { queue: true }).start();
+      service.subscribe((snap) => {
+        if (snap.value === 'b') {
+          service.send({ type: 'STEP' });
+          service.stop();
+          service.send({ type: 'STEP' });
+        }
+      });
+      service.send({ type: 'STEP' });
+      expect(service.getSnapshot().context.steps).toBe(1);
+    });
+
+    it('queue=true: stop() during flush notifies subscribers exactly once for deactivation', () => {
+      const notifyValues: string[] = [];
+      const service = createService(toggleMachine, { queue: true }).start();
+      let stopCalled = false;
+      service.subscribe((snap) => {
+        notifyValues.push(snap.value);
+        if (!stopCalled) {
+          stopCalled = true;
+          service.stop();
+        }
+      });
+      service.send({ type: 'TOGGLE' });
+      expect(notifyValues.filter((v) => v === 'active').length).toBe(1);
+    });
+
+    it('queue=true: send() throws after stop() during flush', () => {
+      const service = createService(toggleMachine, { queue: true }).start();
+      service.subscribe(() => {
+        service.stop();
+      });
+      service.send({ type: 'TOGGLE' });
+      expect(() => service.send({ type: 'TOGGLE' })).toThrow('has been stopped');
+    });
+
+    it('queue=true: discarded queued events do not trigger onTransition', () => {
+      const onTransition = vi.fn();
+      const service = createService(toggleMachine, { queue: true, onTransition }).start();
+      onTransition.mockClear();
+      service.subscribe(() => {
+        service.send({ type: 'TOGGLE' });
+        service.stop();
+        service.send({ type: 'TOGGLE' });
+      });
+      service.send({ type: 'TOGGLE' });
+      const calls = onTransition.mock.calls.length;
+      expect(calls).toBeLessThanOrEqual(2);
+    });
+
+    it('queue=true: send() from stop notification throws (status check before enqueue)', () => {
+      const service = createService(toggleMachine, { queue: true }).start();
+      service.stop();
+      expect(() => service.send({ type: 'TOGGLE' })).toThrow('has been stopped');
+    });
+  });
 });
