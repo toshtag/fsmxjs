@@ -523,4 +523,22 @@ describe('createService', () => {
       expect(service.getSnapshot()).not.toBe(before);
     });
   });
+
+  describe('send: improved error messages', () => {
+    it('throws mentioning "not been started" when sending before start', () => {
+      const service = createService(toggleMachine);
+      expect(() => service.send({ type: 'TOGGLE' })).toThrow('service has not been started');
+    });
+
+    it('throws mentioning "has been stopped" when sending after stop', () => {
+      const service = createService(toggleMachine).start();
+      service.stop();
+      expect(() => service.send({ type: 'TOGGLE' })).toThrow('service has been stopped');
+    });
+
+    it('throws on invalid event shape missing type', () => {
+      const service = createService(toggleMachine).start();
+      expect(() => service.send(null as never)).toThrow('Invalid event: expected { type: string }');
+    });
+  });
 });
