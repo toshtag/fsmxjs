@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Serialization — fsmxjs examples</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 480px; margin: 3rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    p { color: #555; font-size: 0.9rem; }
+    .count { font-size: 2rem; font-weight: bold; margin: 1rem 0; }
+    .buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    button { padding: 0.5rem 1rem; font-size: 0.9rem; cursor: pointer; }
+    .status { margin-top: 0.75rem; font-size: 0.875rem; color: #555; min-height: 1.2em; }
+    a { font-size: 0.875rem; color: #0969da; }
+  </style>
+</head>
+<body>
+  <a href="../">← back</a>
+  <h1>Serialization</h1>
+  <p>Snapshot is serialized to JSON and stored in localStorage. Reload and hydrate to resume.</p>
+  <div class="count" id="count">0</div>
+  <div class="buttons">
+    <button id="inc">+ Increment</button>
+    <button id="dec">− Decrement</button>
+    <button id="save">Save to localStorage</button>
+    <button id="load">Load from localStorage</button>
+    <button id="reset">Reset</button>
+  </div>
+  <div class="status" id="status"></div>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>
