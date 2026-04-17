@@ -134,11 +134,9 @@ export function createMachine<
       ctx = applyActions(ctx, event, toArray(targetNode.entry));
     }
 
-    return {
-      value: hasTarget ? (matched.target as ResolvedState) : state.value,
-      context: ctx,
-      event,
-    };
+    const nextValue = hasTarget ? (matched.target as ResolvedState) : state.value;
+    if (nextValue === state.value && ctx === state.context) return state;
+    return { value: nextValue, context: ctx, event };
   }
 
   function validateConfig(): void {
