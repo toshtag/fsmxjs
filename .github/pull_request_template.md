@@ -6,6 +6,12 @@
 
 <!-- Bullet list of key changes. -->
 
+## Design constraints
+
+- [ ] No `Promise`, `async`, or `await` introduced into `src/` (core stays synchronous)
+- [ ] No framework imports added to `src/`
+- [ ] Public API surface unchanged, or change is explicitly justified in this PR
+
 ## Test plan
 
 - [ ] Existing tests pass (`pnpm test`)
