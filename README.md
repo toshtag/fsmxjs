@@ -2,7 +2,7 @@
 
 Minimal, framework-agnostic finite state machine library for TypeScript.
 
-Inspired by [@xstate/fsm](https://github.com/statelyai/xstate/tree/main/packages/xstate-fsm), but with a simpler API, zero runtime dependencies, and pure TypeScript throughout.
+Originally inspired by [@xstate/fsm](https://github.com/statelyai/xstate/tree/main/packages/xstate-fsm), but evolved into a distinct design: synchronous-only core, async handled entirely outside via companion packages, and explicit rejection of actor/invoke semantics.
 
 ## Features
 
@@ -17,6 +17,32 @@ Inspired by [@xstate/fsm](https://github.com/statelyai/xstate/tree/main/packages
 - Runtime config validation in `createMachine`
 - Snapshot serialization for SSR hydration and persistence
 
+## Design Philosophy
+
+fsmxjs is built on a deliberate separation of concerns.
+
+**Core is intentionally synchronous and async-free.** `machine.transition()` is a pure function. `createService` is a synchronous event loop. There are no Promises, no timers, and no side-effect orchestration inside the core runtime.
+
+**Async is not a layer on top of core — it is a separate concern.** The core does not coordinate async work by design. Async workflows live in companion packages (`@fsmxjs/async`) that wrap the core's `subscribe` / `send` API from the outside.
+
+There are no plans to add async primitives to core.
+
+**Intentionally excluded from the core design:**
+
+- Promise-based transitions
+- Actor model / spawned machines
+- `invoke` / service invocation
+
+> Adding these would fundamentally change the nature of the library.
+
+**Provided separately when needed:**
+
+- Async helpers → `@fsmxjs/async`
+- Framework adapters (React, Vue, etc.)
+- Devtools
+
+---
+
 ## Installation
 
 ```sh
@@ -24,6 +50,21 @@ npm install fsmxjs
 # or
 pnpm add fsmxjs
 ```
+
+## Package Architecture
+
+Two packages are published separately:
+
+| Package | Purpose |
+|---|---|
+| `fsmxjs` | Core synchronous FSM runtime |
+| `@fsmxjs/async` | Async task management companion |
+
+`@fsmxjs/async` declares `fsmxjs >=1.3.0` as a peer dependency. It wraps the core's public API from the outside — core has no knowledge of the async package.
+
+**Why not a monorepo/workspace yet?** Two packages do not justify the tooling overhead. Separate versioning is intentional: the async package can evolve independently of core. This structure will be revisited if a third package warrants shared infrastructure.
+
+---
 
 ## Quick Start
 
@@ -342,26 +383,62 @@ npm install @fsmxjs/async
 pnpm add @fsmxjs/async
 ```
 
+### Task lifecycle
+
+Each task slot (`key`) follows this lifecycle:
+
+```
+run(key, fn) called
+  └─ previous task for key? → abort signal fired
+  └─ new task starts running
+       ├─ completes normally → run() resolves
+       ├─ throws (not aborted) → run() rejects
+       └─ throws after abort → run() resolves (stale error swallowed)
+```
+
+Starting a new task with the same key aborts the previous one automatically.
+
+### Cancellation model
+
+Cancellation is **AbortSignal-based**. When a task is superseded or `abortAll()` is called, the `AbortSignal` fires. In-flight Promises are **not** forcibly stopped.
+
+**Tasks must cooperate with cancellation:**
+
+- Pass `signal` to cancellable APIs (`fetch`, etc.) to trigger network cancellation
+- Check `signal.aborted` before sending events back to the machine
+
+The `send` argument inside a `TaskFn` is a no-op once the signal fires — safe to call without an `aborted` guard if you only need to protect `send`:
+
+```ts
+manager.run('fetch', async ({ signal, send }) => {
+  const data = await fetch('/api/data', { signal }).then((r) => r.json());
+  send({ type: 'LOADED', data }); // no-op if aborted — safe without guard
+});
+```
+
+If you also need to skip post-abort computation, check `signal.aborted` explicitly:
+
+```ts
+manager.run('heavy', async ({ signal, send }) => {
+  const result = await expensiveWork();
+  if (signal.aborted) return;
+  send({ type: 'DONE', result });
+});
+```
+
 ### `createTaskManager(service)`
 
-Manages keyed async tasks. Starting a new task with the same key aborts the previous one.
+Manages keyed async tasks.
 
 ```ts
 import { createTaskManager } from '@fsmxjs/async';
 
 const manager = createTaskManager(service);
 
-// Start a task. A new call with the same key aborts the running one.
 await manager.run('fetch', async ({ signal, snapshot, send }) => {
   const data = await fetch('/api/data', { signal }).then((r) => r.json());
-  if (!signal.aborted) {
-    send({ type: 'LOADED', data });
-  }
+  send({ type: 'LOADED', data });
 });
-
-// Abort all running tasks (call before service.stop())
-manager.abortAll();
-service.stop();
 ```
 
 | Argument | Type | Description |
@@ -373,7 +450,7 @@ service.stop();
 
 | Field | Description |
 |---|---|
-| `signal` | `AbortSignal` — fires when a newer task with the same key is started |
+| `signal` | `AbortSignal` — fires when a newer task with the same key is started, or `abortAll()` is called |
 | `snapshot` | Snapshot captured at the time `run()` was called |
 | `send` | Wraps `service.send()` — no-op if `signal.aborted` |
 
@@ -385,9 +462,16 @@ service.stop();
 | Task throws (not aborted) | `run()` rejects with the error |
 | Task throws after abort | `run()` resolves (stale error swallowed) |
 
-> **Note:** `abortAll()` sends an abort signal to all running tasks. It does not forcibly stop in-flight Promises — tasks must check `signal.aborted` or pass `signal` to `fetch`/other APIs to respond to cancellation.
+#### Teardown
 
-> **Service stop:** `@fsmxjs/async` does not auto-detect service lifecycle stop. Call `manager.abortAll()` before `service.stop()` to cancel running tasks.
+`@fsmxjs/async` does not auto-detect service stop. Always abort tasks before stopping the service:
+
+```ts
+manager.abortAll();
+service.stop();
+```
+
+`abortAll()` fires the abort signal for all running tasks. It does not forcibly stop in-flight Promises. Tasks must pass `signal` to cancellable APIs or check `signal.aborted` to respond to cancellation.
 
 ---
 
@@ -404,10 +488,32 @@ const runSearch = takeLatest(service, 'search');
 inputEl.addEventListener('input', () => {
   runSearch(async ({ signal, send }) => {
     const results = await search(inputEl.value, { signal });
-    if (!signal.aborted) send({ type: 'RESULTS', results });
+    send({ type: 'RESULTS', results });
   });
 });
 ```
+
+---
+
+## Roadmap
+
+### Delivered
+
+| Release | Highlights |
+|---|---|
+| v1.0 | Core FSM runtime: `createMachine`, `createService`, guards, context reducers |
+| v1.1 | Debug hooks (`onTransition`, `onError`), runtime config validation |
+| v1.2 | Queue mode, explicit stop-during-flush semantics |
+| v1.3 | Snapshot serialization (`serializeSnapshot`, `deserializeSnapshot`) |
+| v2.0 | `@fsmxjs/async` companion package; core remains async-free |
+
+### Future direction
+
+**v2.x** — Improve async usability without expanding core responsibilities. All improvements stay within companion packages. No changes to core runtime semantics.
+
+**v3 (tentative)** — Re-evaluate repository structure if package count and maintenance cost justify it. Candidates: workspace/monorepo migration, `@fsmxjs/devtools`, `@fsmxjs/react`. No commitment yet.
+
+See [Design Philosophy](#design-philosophy) for core design constraints.
 
 ---
 
