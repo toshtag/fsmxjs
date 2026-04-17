@@ -63,7 +63,7 @@ export function createMachine<
     StateNodeConfig<
       TContext,
       [TEvent] extends [never] ? InferEvents<TStates> : TEvent,
-      Extract<keyof TStates, string>
+      string
     >
   > = Record<string, StateNodeConfig<TContext, EventObject, string>>,
 >(config: {
