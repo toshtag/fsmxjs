@@ -1,15 +1,13 @@
-import path from 'path';
 import { defineConfig } from 'tsup';
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
-
 export default defineConfig({
-  entry: [path.join(__dirname, 'src/index.ts')],
+  entry: ['packages/async/src/index.ts'],
   format: ['cjs', 'esm'],
   dts: true,
-  clean: true,
+  clean: false,
   sourcemap: true,
   target: 'node18',
-  outDir: path.join(__dirname, 'dist'),
+  outDir: 'packages/async/dist',
   external: ['fsmxjs'],
+  tsconfig: 'packages/async/tsconfig.json',
 });
