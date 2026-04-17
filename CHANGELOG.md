@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-04-17
+
 ### Added
 
 - `ServiceOptions.queue` — optional boolean flag to enable queue mode for reentrant sends
