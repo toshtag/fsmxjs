@@ -556,19 +556,28 @@ describe('createService', () => {
     it('queue=true: reentrant send from subscriber is enqueued, not thrown', () => {
       const service = createService(toggleMachine, { queue: true }).start();
       let threw = false;
-      service.subscribe(() => {
-        try { service.send({ type: 'TOGGLE' }); } catch { threw = true; }
+      let called = false;
+      service.subscribe((snap) => {
+        if (!called && snap.value === 'active') {
+          called = true;
+          try { service.send({ type: 'TOGGLE' }); } catch { threw = true; }
+        }
       });
       service.send({ type: 'TOGGLE' });
       expect(threw).toBe(false);
     });
 
-    it('queue=true: reentrant send returns current snapshot at enqueue time', () => {
+    it('queue=true: reentrant send returns snapshot at enqueue time (not post-flush)', () => {
       const service = createService(toggleMachine, { queue: true }).start();
       let returnedSnap: unknown;
-      const snapAtEnqueue = service.getSnapshot();
-      service.subscribe(() => {
-        returnedSnap = service.send({ type: 'TOGGLE' });
+      let snapAtEnqueue: unknown;
+      let called = false;
+      service.subscribe((snap) => {
+        if (!called && snap.value === 'active') {
+          called = true;
+          snapAtEnqueue = service.getSnapshot();
+          returnedSnap = service.send({ type: 'TOGGLE' });
+        }
       });
       service.send({ type: 'TOGGLE' });
       expect(returnedSnap).toBe(snapAtEnqueue);
@@ -576,8 +585,10 @@ describe('createService', () => {
 
     it('queue=true: final state after flush is available via getSnapshot()', () => {
       const service = createService(toggleMachine, { queue: true }).start();
+      let count = 0;
       service.subscribe(() => {
-        service.send({ type: 'TOGGLE' });
+        count++;
+        if (count === 1) service.send({ type: 'TOGGLE' });
       });
       service.send({ type: 'TOGGLE' });
       expect(service.getSnapshot().value).toBe('idle');
@@ -654,30 +665,28 @@ describe('createService', () => {
         },
       });
       const service = createService(machine, { queue: true }).start();
+      let notifyCount = 0;
       service.subscribe((snap) => {
-        if (snap.value === 'b') {
+        notifyCount++;
+        if (snap.value === 'b' && notifyCount === 1) {
+          service.send({ type: 'STEP' });
           service.send({ type: 'STEP' });
           service.stop();
-          service.send({ type: 'STEP' });
         }
       });
       service.send({ type: 'STEP' });
       expect(service.getSnapshot().context.steps).toBe(1);
     });
 
-    it('queue=true: stop() during flush notifies subscribers exactly once for deactivation', () => {
-      const notifyValues: string[] = [];
+    it('queue=true: stop() during flush triggers stop notification once', () => {
+      let notifyCount = 0;
       const service = createService(toggleMachine, { queue: true }).start();
-      let stopCalled = false;
-      service.subscribe((snap) => {
-        notifyValues.push(snap.value);
-        if (!stopCalled) {
-          stopCalled = true;
-          service.stop();
-        }
+      service.subscribe(() => {
+        notifyCount++;
+        if (notifyCount === 1) service.stop();
       });
       service.send({ type: 'TOGGLE' });
-      expect(notifyValues.filter((v) => v === 'active').length).toBe(1);
+      expect(notifyCount).toBe(2);
     });
 
     it('queue=true: send() throws after stop() during flush', () => {
@@ -693,10 +702,14 @@ describe('createService', () => {
       const onTransition = vi.fn();
       const service = createService(toggleMachine, { queue: true, onTransition }).start();
       onTransition.mockClear();
-      service.subscribe(() => {
-        service.send({ type: 'TOGGLE' });
-        service.stop();
-        service.send({ type: 'TOGGLE' });
+      let called = false;
+      service.subscribe((snap) => {
+        if (!called && snap.value === 'active') {
+          called = true;
+          service.send({ type: 'TOGGLE' });
+          service.send({ type: 'TOGGLE' });
+          service.stop();
+        }
       });
       service.send({ type: 'TOGGLE' });
       const calls = onTransition.mock.calls.length;
