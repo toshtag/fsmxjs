@@ -16,7 +16,8 @@
     "isolatedModules": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"]
 }
