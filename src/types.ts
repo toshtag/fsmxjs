@@ -81,6 +81,7 @@ export type ServiceOptions<
     changed: boolean;
   }) => void;
   onError?: (error: unknown) => void;
+  queue?: boolean;
 };
 
 export interface Machine<
