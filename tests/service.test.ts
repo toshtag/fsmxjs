@@ -399,6 +399,7 @@ describe('createService', () => {
       const service = createService(toggleMachine, {
         onTransition: () => { order.push('hook'); },
       } as AnyOptions).start();
+      order.length = 0;
       service.subscribe(() => { order.push('subscriber'); });
       service.send({ type: 'TOGGLE' });
       expect(order).toEqual(['hook', 'subscriber']);
@@ -440,6 +441,7 @@ describe('createService', () => {
       const service = createService(toggleMachine, {
         onTransition: () => { order.push('hook'); },
       } as AnyOptions).start();
+      order.length = 0;
       service.subscribe(() => { order.push('subscriber'); });
       service.stop();
       expect(order).toEqual(['hook', 'subscriber']);
