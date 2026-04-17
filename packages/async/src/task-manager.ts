@@ -1,5 +1,4 @@
-import type { EventObject, Snapshot } from 'fsmxjs';
-import type { Service } from 'fsmxjs';
+import type { EventObject, Service, Snapshot } from 'fsmxjs';
 
 export type TaskFn<
   TContext,
@@ -25,7 +24,43 @@ export function createTaskManager<
   TEvent extends EventObject,
   TStateValue extends string,
 >(
-  _service: Service<TContext, TEvent, TStateValue>,
+  service: Service<TContext, TEvent, TStateValue>,
 ): TaskManager<TContext, TEvent, TStateValue> {
-  throw new Error('not implemented');
+  const controllers = new Map<string, AbortController>();
+
+  return {
+    async run(key, task) {
+      const prev = controllers.get(key);
+      if (prev) prev.abort();
+
+      const controller = new AbortController();
+      controllers.set(key, controller);
+      const { signal } = controller;
+
+      const snapshot = service.getSnapshot();
+
+      try {
+        await task({
+          signal,
+          snapshot,
+          send: (event) => {
+            if (signal.aborted) return;
+            service.send(event);
+          },
+        });
+      } catch (err) {
+        if (signal.aborted) return;
+        throw err;
+      } finally {
+        if (controllers.get(key) === controller) {
+          controllers.delete(key);
+        }
+      }
+    },
+
+    abortAll() {
+      for (const ctrl of controllers.values()) ctrl.abort();
+      controllers.clear();
+    },
+  };
 }

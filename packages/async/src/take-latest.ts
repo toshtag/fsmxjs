@@ -1,5 +1,4 @@
-import type { EventObject } from 'fsmxjs';
-import type { Service } from 'fsmxjs';
+import type { EventObject, Service } from 'fsmxjs';
 import type { TaskFn } from './task-manager';
 
 export function takeLatest<
