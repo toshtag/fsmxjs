@@ -1,5 +1,42 @@
 # Contributing
 
+## Design Philosophy
+
+fsmxjs has a deliberate, narrow scope. Before proposing or implementing anything, understand what this library is and is not.
+
+### What fsmxjs is
+
+> A synchronous FSM core that keeps async, UI, and side effects entirely outside.
+
+This is not an implementation detail — it is the design philosophy itself.
+
+### Hard constraints
+
+These constraints are non-negotiable. Proposals that violate them will be declined regardless of how useful they seem.
+
+| Constraint | Rule |
+|-----------|------|
+| Core is synchronous | No `Promise`, `async`, or `await` in `src/` |
+| Async is isolated | All async orchestration lives in `@fsmxjs/async` only |
+| One layer, one responsibility | core = transitions, async = orchestration, UI = adapter |
+| No XState features | No `invoke`, actor model, `spawn`, or service orchestration |
+| Small API is intentional | Fewer methods is a strategic choice, not a gap |
+
+### Proposal checklist
+
+Use this checklist to evaluate whether your idea fits this library.
+If any answer is "No", the proposal will likely be declined.
+
+- [ ] Is the proposed change synchronous? (async → belongs in `@fsmxjs/async` or a new package)
+- [ ] Does it operate only on state transitions, not side effects or lifecycle?
+- [ ] Is it essential to FSM semantics, not just convenient to have?
+- [ ] Does it avoid expanding the public API surface unnecessarily?
+- [ ] Does it avoid importing or depending on any framework (React, Vue, DOM, Node-only APIs)?
+
+If you answered "No" to one or more items, consider whether the proposal belongs in a separate adapter or companion package instead.
+
+---
+
 ## Setup
 
 ```sh
