@@ -210,3 +210,11 @@ If you want actor supervision, invoked services, or hierarchical/parallel states
 ## Not in this list?
 
 If your situation does not match one of these five, the responsibility-based comparison in [docs/comparisons.md](comparisons.md) helps you decide whether `useReducer`, Jotai, XState, or fsmxjs is the right choice.
+
+---
+
+See also:
+- [`../README.md`](../README.md) — entry point and quick example
+- [`comparisons.md`](comparisons.md) — responsibility-based comparison
+- [`philosophy.md`](philosophy.md) — why the API is shaped this way
+- [`api.md`](api.md) — full API reference
