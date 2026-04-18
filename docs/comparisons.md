@@ -69,3 +69,10 @@ Reach for Jotai when the problem is *sharing state across components*. Reach for
 - Global / shared state → Jotai
 - Orchestration / actors / invoke → XState
 - Small, pure transition logic outside UI → fsmxjs
+
+---
+
+See also:
+- [`../README.md`](../README.md) — entry point and quick example
+- [`use-cases.md`](use-cases.md) — five recurring shapes fsmxjs is designed for
+- [`philosophy.md`](philosophy.md) — why fsmxjs refuses to grow into XState

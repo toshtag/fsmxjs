@@ -70,4 +70,6 @@ If the library ever grows actors, invoke, or async transitions, it will be a dif
 
 See also:
 - [`../README.md`](../README.md) — entry point and quick example
+- [`use-cases.md`](use-cases.md) — recurring problem shapes this design solves
+- [`comparisons.md`](comparisons.md) — how this design relates to XState, useReducer, Jotai
 - [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — proposal checklist and contribution flow
