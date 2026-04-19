@@ -1,0 +1,1 @@
+function e(e){let t=new Map;return{async run(n,r){let i=t.get(n);i&&i.abort();let a=new AbortController;t.set(n,a);let{signal:o}=a,s=e.getSnapshot();try{await r({signal:o,snapshot:s,send:t=>{o.aborted||e.send(t)}})}catch(e){if(o.aborted)return;throw e}finally{t.get(n)===a&&t.delete(n)}},abortAll(){for(let e of t.values())e.abort();t.clear()}}}export{e as t};
