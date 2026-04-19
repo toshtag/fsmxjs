@@ -70,6 +70,8 @@ Reach for Jotai when the problem is *sharing state across components*. Reach for
 - Orchestration / actors / invoke → XState
 - Small, pure transition logic outside UI → fsmxjs
 
+For a consolidated decision tree, see [decision-guide.md](decision-guide.md).
+
 ---
 
 See also:
