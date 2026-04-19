@@ -18,6 +18,7 @@ export default defineConfig({
         'queue-mode': path.resolve(__dirname, 'queue-mode/index.html'),
         serialization: path.resolve(__dirname, 'serialization/index.html'),
         'async-search': path.resolve(__dirname, 'async-search/index.html'),
+        'data-fetch': path.resolve(__dirname, 'data-fetch/index.html'),
       },
     },
   },
