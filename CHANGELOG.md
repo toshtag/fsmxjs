@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-04-19
+
+### Added
+
+- `docs/decision-guide.md` — consolidated adoption decision guide with a 3-question decision tree, green flags, and red flags as a single entrypoint into existing README / comparisons / use-cases content
+- `docs/async-scope.md` — explicit documentation of `@fsmxjs/async` scope: what problems it solves, its contract with core, and what it deliberately does not own
+- `docs/adapters.md` — UI adapter strategy: no official adapter package yet, React wiring recipes (subscribe, selector pattern, scoped service), and criteria for when an official package will ship
+- Links from `README.md`, `docs/philosophy.md`, and `docs/comparisons.md` to the new documents
+
 ## [1.3.2] - 2026-04-17
 
 ### Fixed
