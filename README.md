@@ -3,7 +3,7 @@
 Minimal, framework-agnostic finite state machine library for TypeScript.
 
 **[Live examples →](https://toshtag.github.io/fsmxjs/)**
-Toggle · Form wizard · Queue mode · Snapshot serialization · Async task manager
+Toggle · Form wizard · Queue mode · Snapshot serialization · Async task manager · Data fetch
 
 ## What is fsmxjs?
 
@@ -86,7 +86,10 @@ service.send({ type: 'TOGGLE' }); // idle   { count: 2 }
 
 - [Toggle](examples/toggle/main.ts) — the smallest possible explicit transition flow.
 - [Form wizard](examples/form-wizard/main.ts) — multi-step flow with guarded transitions and context updates.
-- [Async search](examples/async-search/main.ts) — handling async work without leaking it into the UI layer.
+- [Queue mode](examples/queue-mode/main.ts) — safe reentrant `send()` from within subscriber callbacks.
+- [Serialization](examples/serialization/main.ts) — snapshot persistence and hydration.
+- [Async search](examples/async-search/main.ts) — `takeLatest` cancellation with `@fsmxjs/async`.
+- [Data fetch](examples/data-fetch/main.ts) — fetch with loading, error, and retry limit.
 
 The full set is in [`examples/`](examples/) and runs live at [toshtag.github.io/fsmxjs](https://toshtag.github.io/fsmxjs/).
 
