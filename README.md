@@ -21,12 +21,16 @@ The core is synchronous and pure. Async, side effects, and rendering live in ada
 
 See [docs/use-cases.md](docs/use-cases.md) for each shape with smelly-code examples and minimal fixes.
 
+Not sure yet? See [docs/decision-guide.md](docs/decision-guide.md) for a decision tree.
+
 ## When not to use fsmxjs
 
 - You need actors, `invoke`, hierarchical or parallel states — use [XState](https://stately.ai/docs/xstate).
 - A single boolean drives the workflow — `useState` is fine.
 - You need a global shared store across components — use [Jotai](https://jotai.org/) or similar.
 - You want the framework to own side effects — fsmxjs deliberately keeps them out.
+
+See [docs/decision-guide.md](docs/decision-guide.md) for a consolidated decision tree.
 
 ## Packages
 
@@ -36,6 +40,8 @@ See [docs/use-cases.md](docs/use-cases.md) for each shape with smelly-code examp
 | [`@fsmxjs/async`](packages/async/README.md) | Async task management companion |
 
 `@fsmxjs/async` declares `fsmxjs >=1.3.0` as a peer dependency. It wraps the core's public API from the outside — core has no knowledge of the async package.
+
+See [docs/async-scope.md](docs/async-scope.md) for what this package does and does not own.
 
 ```sh
 npm install fsmxjs
