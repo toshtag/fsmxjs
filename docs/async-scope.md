@@ -42,5 +42,5 @@ Use this when async coordination is becoming the actual complexity. For simple `
 
 ## See also
 
-- [`../../packages/async/README.md`](../packages/async/README.md) — full API reference and realistic examples
+- [`../packages/async/README.md`](../packages/async/README.md) — full API reference and realistic examples
 - [`philosophy.md`](philosophy.md) — why async is a separate package
