@@ -11,6 +11,8 @@ A small state machine library for keeping transition logic outside the UI layer 
 
 The core is synchronous and pure. Async, side effects, and rendering live in adapters and companion packages — never inside the core. That boundary is the design, not an implementation detail.
 
+For framework wiring recipes (React and others), see [docs/adapters.md](docs/adapters.md).
+
 ## You probably need this if:
 
 - Your `useState` flags and `useEffect` branches keep multiplying around a single workflow.
