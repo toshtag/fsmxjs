@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.4] - 2026-04-19
+
+### Added
+
+- `examples/data-fetch/` — canonical real-world example: fetch with loading, error handling, and retry limit (guard prevents retrying past `MAX_RETRIES`). Uses `@fsmxjs/async` `createTaskManager`.
+- Updated `README.md` Examples section to list all six demos.
+
 ## [1.3.3] - 2026-04-19
 
 ### Added
