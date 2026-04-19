@@ -32,6 +32,8 @@ One layer, one responsibility:
 
 Crossing these boundaries — for example, embedding async into core for "convenience" — is rejected on principle. The boundary is the value.
 
+See [`adapters.md`](adapters.md) for the current adapter strategy and React wiring recipes.
+
 ## Intentionally excluded
 
 `fsmxjs` will not support: actors, invoke, hierarchical states, parallel states, Promise-based transitions.
@@ -70,6 +72,7 @@ If the library ever grows actors, invoke, or async transitions, it will be a dif
 
 See also:
 - [`../README.md`](../README.md) — entry point and quick example
+- [`adapters.md`](adapters.md) — UI adapter strategy and framework wiring recipes
 - [`use-cases.md`](use-cases.md) — recurring problem shapes this design solves
 - [`comparisons.md`](comparisons.md) — how this design relates to XState, useReducer, Jotai
 - [`../CONTRIBUTING.md`](../CONTRIBUTING.md) — proposal checklist and contribution flow
