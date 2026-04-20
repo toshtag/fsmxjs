@@ -11,7 +11,7 @@ A small state machine library for keeping transition logic outside the UI layer 
 
 The core is synchronous and pure. Async, side effects, and rendering live in adapters and companion packages — never inside the core. That boundary is the design, not an implementation detail.
 
-For framework wiring recipes (React and others), see [docs/adapters.md](docs/adapters.md).
+For framework wiring recipes (React and others), see [docs/adapters.md](https://github.com/toshtag/fsmxjs/blob/main/docs/adapters.md).
 
 ## You probably need this if:
 
@@ -21,9 +21,9 @@ For framework wiring recipes (React and others), see [docs/adapters.md](docs/ada
 - You want to unit-test transitions as pure functions, without rendering anything.
 - You looked at XState and bounced — you want explicit transitions, not an actor framework.
 
-See [docs/use-cases.md](docs/use-cases.md) for each shape with smelly-code examples and minimal fixes.
+See [docs/use-cases.md](https://github.com/toshtag/fsmxjs/blob/main/docs/use-cases.md) for each shape with smelly-code examples and minimal fixes.
 
-Not sure yet? See [docs/decision-guide.md](docs/decision-guide.md) for a decision tree.
+Not sure yet? See [docs/decision-guide.md](https://github.com/toshtag/fsmxjs/blob/main/docs/decision-guide.md) for a decision tree.
 
 ## When not to use fsmxjs
 
@@ -32,18 +32,18 @@ Not sure yet? See [docs/decision-guide.md](docs/decision-guide.md) for a decisio
 - You need a global shared store across components — use [Jotai](https://jotai.org/) or similar.
 - You want the framework to own side effects — fsmxjs deliberately keeps them out.
 
-See [docs/decision-guide.md](docs/decision-guide.md) for a consolidated decision tree.
+See [docs/decision-guide.md](https://github.com/toshtag/fsmxjs/blob/main/docs/decision-guide.md) for a consolidated decision tree.
 
 ## Packages
 
 | Package | Purpose |
 |---|---|
 | [`fsmxjs`](https://www.npmjs.com/package/fsmxjs) | Core synchronous FSM runtime |
-| [`@fsmxjs/async`](packages/async/README.md) | Async task management companion |
+| [`@fsmxjs/async`](https://github.com/toshtag/fsmxjs/blob/main/packages/async/README.md) | Async task management companion |
 
 `@fsmxjs/async` declares `fsmxjs >=1.3.0` as a peer dependency. It wraps the core's public API from the outside — core has no knowledge of the async package.
 
-See [docs/async-scope.md](docs/async-scope.md) for what this package does and does not own.
+See [docs/async-scope.md](https://github.com/toshtag/fsmxjs/blob/main/docs/async-scope.md) for what this package does and does not own.
 
 ```sh
 npm install fsmxjs
@@ -84,25 +84,25 @@ service.send({ type: 'TOGGLE' }); // idle   { count: 2 }
 
 ## Examples
 
-- [Toggle](examples/toggle/main.ts) — the smallest possible explicit transition flow.
-- [Form wizard](examples/form-wizard/main.ts) — multi-step flow with guarded transitions and context updates.
-- [Queue mode](examples/queue-mode/main.ts) — safe reentrant `send()` from within subscriber callbacks.
-- [Serialization](examples/serialization/main.ts) — snapshot persistence and hydration.
-- [Async search](examples/async-search/main.ts) — `takeLatest` cancellation with `@fsmxjs/async`.
-- [Data fetch](examples/data-fetch/main.ts) — fetch with loading, error, and retry limit.
+- [Toggle](https://github.com/toshtag/fsmxjs/blob/main/examples/toggle/main.ts) — the smallest possible explicit transition flow.
+- [Form wizard](https://github.com/toshtag/fsmxjs/blob/main/examples/form-wizard/main.ts) — multi-step flow with guarded transitions and context updates.
+- [Queue mode](https://github.com/toshtag/fsmxjs/blob/main/examples/queue-mode/main.ts) — safe reentrant `send()` from within subscriber callbacks.
+- [Serialization](https://github.com/toshtag/fsmxjs/blob/main/examples/serialization/main.ts) — snapshot persistence and hydration.
+- [Async search](https://github.com/toshtag/fsmxjs/blob/main/examples/async-search/main.ts) — `takeLatest` cancellation with `@fsmxjs/async`.
+- [Data fetch](https://github.com/toshtag/fsmxjs/blob/main/examples/data-fetch/main.ts) — fetch with loading, error, and retry limit.
 
-The full set is in [`examples/`](examples/) and runs live at [toshtag.github.io/fsmxjs](https://toshtag.github.io/fsmxjs/).
+The full set is in [`examples/`](https://github.com/toshtag/fsmxjs/tree/main/examples) and runs live at [toshtag.github.io/fsmxjs](https://toshtag.github.io/fsmxjs/).
 
 ## Design philosophy
 
 fsmxjs is built on a deliberate separation of concerns:
 
 - **Core is intentionally synchronous and async-free.** `transition()` is pure; `createService` is a synchronous event loop. No Promises, no timers, no orchestration in core.
-- **Async is a separate package, not a layer on top.** [`@fsmxjs/async`](packages/async/README.md) wraps the core's public API from the outside.
+- **Async is a separate package, not a layer on top.** [`@fsmxjs/async`](https://github.com/toshtag/fsmxjs/blob/main/packages/async/README.md) wraps the core's public API from the outside.
 - **Intentionally excluded:** actors, `invoke`, hierarchical states, parallel states, Promise-based transitions. These are design boundaries, not gaps to fill later.
 - **Small API is strategic.** Adding surface area without a clear FSM-essence justification is treated as a regression in design.
 
-Full rationale and the new-feature proposal checklist live in [docs/philosophy.md](docs/philosophy.md).
+Full rationale and the new-feature proposal checklist live in [docs/philosophy.md](https://github.com/toshtag/fsmxjs/blob/main/docs/philosophy.md).
 
 ## Comparison by responsibility
 
@@ -121,7 +121,7 @@ Decision rules:
 - Orchestration / actors / invoke → XState
 - Small, pure transition logic outside UI → fsmxjs
 
-Full breakdown in [docs/comparisons.md](docs/comparisons.md).
+Full breakdown in [docs/comparisons.md](https://github.com/toshtag/fsmxjs/blob/main/docs/comparisons.md).
 
 ## API at a glance
 
@@ -151,13 +151,13 @@ Surface area:
 - `createService(machine, options?)` — runtime with `start`, `stop`, `send`, `subscribe`, `select`, `getSnapshot`, plus `onTransition` / `onError` / `queue` options.
 - `serializeSnapshot` / `deserializeSnapshot` — JSON round-trip for SSR hydration and persistence.
 
-Full reference (all options, transition semantics, context updates, explicit event types): [docs/api.md](docs/api.md).
+Full reference (all options, transition semantics, context updates, explicit event types): [docs/api.md](https://github.com/toshtag/fsmxjs/blob/main/docs/api.md).
 
-For async coordination (cancellation, supersession, `takeLatest`): [packages/async/README.md](packages/async/README.md).
+For async coordination (cancellation, supersession, `takeLatest`): [packages/async/README.md](https://github.com/toshtag/fsmxjs/blob/main/packages/async/README.md).
 
 ## Roadmap
 
-See [CHANGELOG.md](CHANGELOG.md) for delivered releases and the current near-term track.
+See [CHANGELOG.md](https://github.com/toshtag/fsmxjs/blob/main/CHANGELOG.md) for delivered releases and the current near-term track.
 
 ## Community
 
@@ -166,7 +166,7 @@ See [CHANGELOG.md](CHANGELOG.md) for delivered releases and the current near-ter
 | [Discussions](https://github.com/toshtag/fsmxjs/discussions) | Questions, ideas, show-and-tell, anything that isn't a confirmed bug |
 | [Issues](https://github.com/toshtag/fsmxjs/issues) | Confirmed bugs only |
 
-If you're not sure whether it's a bug, open a Discussion first. See [CONTRIBUTING.md](CONTRIBUTING.md) for the proposal flow.
+If you're not sure whether it's a bug, open a Discussion first. See [CONTRIBUTING.md](https://github.com/toshtag/fsmxjs/blob/main/CONTRIBUTING.md) for the proposal flow.
 
 ## License
 
