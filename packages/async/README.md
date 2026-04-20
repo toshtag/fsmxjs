@@ -218,9 +218,9 @@ service.stop();
 
 ## See also
 
-- [`../../README.md`](../../README.md) — fsmxjs entry point
-- [`../../docs/philosophy.md`](../../docs/philosophy.md) — why async is a separate package
-- [`../../docs/api.md`](../../docs/api.md) — core API reference
+- [fsmxjs README](https://github.com/toshtag/fsmxjs/blob/main/README.md) — fsmxjs entry point
+- [docs/philosophy.md](https://github.com/toshtag/fsmxjs/blob/main/docs/philosophy.md) — why async is a separate package
+- [docs/api.md](https://github.com/toshtag/fsmxjs/blob/main/docs/api.md) — core API reference
 
 ## License
 

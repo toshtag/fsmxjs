@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.5] - 2026-04-20
+
+### Fixed
+
+- All relative links in `README.md` converted to absolute GitHub URLs so they resolve correctly on the npm registry page
+
 ## [1.3.4] - 2026-04-19
 
 ### Added
