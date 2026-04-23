@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.6] - 2026-04-23
+
+### Changed
+
+- Added `author` field to `package.json`
+
+## [@fsmxjs/async 1.0.2] - 2026-04-23
+
+### Changed
+
+- Added `author` field to `package.json`
+
 ## [1.3.5] - 2026-04-20
 
 ### Fixed

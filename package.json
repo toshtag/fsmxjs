@@ -1,6 +1,6 @@
 {
   "name": "fsmxjs",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "Minimal, framework-agnostic finite state machine library for TypeScript",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -39,7 +39,7 @@
     "typescript",
     "framework-agnostic"
   ],
-  "author": "",
+  "author": "toshtag (https://github.com/toshtag)",
   "license": "MIT",
   "engines": {
     "node": ">=18"

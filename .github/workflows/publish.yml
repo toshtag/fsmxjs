@@ -24,7 +24,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Publish
+      - name: Publish fsmxjs
+        if: startsWith(github.ref_name, 'v')
         run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @fsmxjs/async
+        if: startsWith(github.ref_name, 'async-v')
+        run: pnpm publish --no-git-checks --filter @fsmxjs/async
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

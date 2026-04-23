@@ -1,6 +1,6 @@
 {
   "name": "@fsmxjs/async",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Async task helpers for fsmxjs",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -26,7 +26,7 @@
     "typescript",
     "async"
   ],
-  "author": "",
+  "author": "toshtag (https://github.com/toshtag)",
   "license": "MIT",
   "engines": {
     "node": ">=18"
